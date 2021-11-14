@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-:mod:`stats_to_db` - Example on how to capture port statistics and add them to your own database
+:mod:`ge_stats_to_db` - Example on how to capture GE port statistics and add them to your own database
 
 **Description**
 
-  This module contains sample code to illustrate:
+  Similar to stats_to_db, this module contains sample code to illustrate:
 
   * How to capture basic port information
   * How to capture GE port statistics
@@ -32,19 +32,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | Version   | Last Edit     | Description                                                                       |
     +===========+===============+===================================================================================+
-    | 1.0.0     | 25 Feb 2021   | Initial Launch                                                                    |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 1.0.1     | 14 Nov 2021   | Deprecated xpyfos_auth                                                             |
+    | 1.0.0     | xx xxx 2021   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '14 Nov 2021'
+__date__ = 'xx xxx 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
-__status__ = 'Released'
-__version__ = '1.0.1'
+__status__ = 'Development'
+__version__ = '1.0.0'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -145,7 +143,7 @@ def pseudo_main():
     ml.append('FID: ' + fid_str)
     try:
         fid = int(fid_str)
-    except ValueError:
+    except:
         brcdapi_log.log('Invalid FID, -f. FID must be an integer between 1-128')
     brcdapi_log.log(ml, True)
 
@@ -182,8 +180,8 @@ def pseudo_main():
 
         # Get some basic port information
         if ec == 0:  # Make sure we didn't encountered any errors above
-            # It's common to keep track of other port information, such as the user friendly name and FC address. Below
-            # captures this basic port information.
+            # It's common to keep track of other port information, such as the user friendly name. o
+            # capture some basic port information.
             brcdapi_log.log('Capturing basic port information.', True)
             uri = 'brocade-interface/fibrechannel'
             port_info = brcdapi_rest.get_request(session, uri, fid)
@@ -220,7 +218,7 @@ def pseudo_main():
                 for k, v in port_stats_d[port_num].items():
                     _db_add(switch_wwn, port_num, k, v)
 
-    except:  # Bare because I don't care what went wrong. I just want to logout
+    except:
         # The brcdapi_log.exception() method precedes the passed message parameter with a stack trace
         brcdapi_log.exception('Unknown programming error occured while processing: ' + uri, True)
 

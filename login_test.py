@@ -28,26 +28,28 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.2     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 import argparse
 import brcdapi.log as brcdapi_log
 import brcdapi.util as brcdapi_util
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 
 _DOC_STRING = False  # Should always be False. Prohibits any code execution. Only useful for building documentation
 _DEBUG = False  # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, AND _DEBUG_OUTF instead of passed arguments
-_DEBUG_IP = '10.38.46.97'
+_DEBUG_IP = 'xx.xx.xx.xx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = None  # 'self'
@@ -105,17 +107,17 @@ def psuedo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed. Error message is:', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
 
     # Logout
     brcdapi_log.log('Login succeeded. Attempting logout', True)
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
+    if brcdapi_auth.is_error(obj):
         brcdapi_log.log('Logout failed. Error message is:', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         return -1
     brcdapi_log.log('Logout succeeded.', True)
     return 1

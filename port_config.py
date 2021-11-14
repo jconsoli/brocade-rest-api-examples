@@ -39,25 +39,26 @@ Version Control::
     | 3.0.3     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     |           |               | Broke out examples into seperate modules.                                         |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.4     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '3.0.4'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
-import brcdapi.port as brcdapi_port
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_IP = '10.8.105.10'
+_DEBUG_IP = 'xx.x.xxx.xx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
@@ -103,8 +104,8 @@ def parse_args():
         parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=True)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
-        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log ' \
-              'file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
+        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log' \
+              ' file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
         parser.add_argument('-log', help=buf, required=False, )
         buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
@@ -137,9 +138,9 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
     brcdapi_log.log('Login succeeded', True)
 
@@ -149,7 +150,7 @@ def pseudo_main():
         # Get FC port list for this FID by reading the configurations
         kpi = 'brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)
             ec = -1
 
@@ -168,21 +169,21 @@ def pseudo_main():
                 pl.append(d)
             # PATCH only changes specified leaves in the content for this URI. It does not replace all resources
             obj = brcdapi_rest.send_request(session, 'brocade-interface/fibrechannel', 'PATCH', content, fid)
-            if pyfos_auth.is_error(obj):
+            if brcdapi_auth.is_error(obj):
                 brcdapi_log.log('Error configuring ports for FID ' + str(fid), True)
-                brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+                brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
                 ec = -1
             else:
                 brcdapi_log.log('Successfully configured ports for FID ' + str(fid), True)
 
-    except:
+    except:  # Bare because I don't care what went wrong at this point. I just want to log out no matter what happens.
         brcdapi_log.log('Encountered a programming error', True)
         ec = -1
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
     return ec
 
 

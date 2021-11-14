@@ -26,19 +26,21 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.1-3   | 17 Apr 2021   | Miscellaneous bug fixes                                                           |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.4     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '17 Apr 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.3'
+__version__ = '3.0.4'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
@@ -100,8 +102,8 @@ def _clear_dashboard(session, fid):
     """
     content = {'clear-data': True}
     obj = brcdapi_rest.send_request(session, 'brocade-maps/dashboard-misc', 'PUT', content, fid)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         return -1
     return 0
 
@@ -127,22 +129,21 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
     brcdapi_log.log('Login succeeded', True)
 
-    # try/except used during development to ensure logout due to programming errors.
     try:
         ec = _clear_dashboard(session, fid)
-    except:
+    except:  # Base except because I don't care what went wrong, I just want to make sure we logout.
         brcdapi_log.exception('Encountered a programming error', True)
         ec = -1
 
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
     return ec
 
 ###################################################################

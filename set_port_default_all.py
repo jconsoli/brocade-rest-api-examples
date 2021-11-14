@@ -31,25 +31,27 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 13 Feb 2021   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 import brcdapi.port as brcdapi_port
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_IP = '10.8.105.10'
+_DEBUG_IP = '10.x.xxx.xx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
@@ -126,9 +128,9 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
     brcdapi_log.log('Login succeeded', True)
 
@@ -138,7 +140,7 @@ def pseudo_main():
         # Get FC port list for this FID by reading the configurations
         kpi = 'brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)
             ec = -1
 
@@ -149,9 +151,9 @@ def pseudo_main():
             # Disable all ports and set to the default configuration.
             brcdapi_log.log('Disabling all ports of fid: ' + str(fid) + ' and setting to default configuration', True)
             obj = brcdapi_port.default_port_config(session, fid, fc_plist)
-            if pyfos_auth.is_error(obj):
+            if brcdapi_auth.is_error(obj):
                 brcdapi_log.log('Set ports to default for FID ' + str(fid) + ' failed', True)
-                brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+                brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
                 ec = -1
             else:
                 brcdapi_log.log('Successfully set all ports for FID ' + str(fid) + ' to the default configuration',
@@ -163,8 +165,8 @@ def pseudo_main():
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
     return ec
 
 

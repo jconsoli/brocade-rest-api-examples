@@ -61,26 +61,28 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.2     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 import brcdapi.switch as brcdapi_switch
 import brcdapi.port as brcdapi_port
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False  # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_OUTF, and _DEBUG_VERBOSE
-_DEBUG_IP = '10.8.105.10'
+_DEBUG_IP = '10.x.xxx.xx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
@@ -104,7 +106,7 @@ _DEBUG_FAB_NAME = "Fabric_0"
 def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports, es, ep, echo):
     """Create a logical switch. Includes options to set a few basic parameters
 
-    :param session: Session object returned from brcdapi.pyfos_auth.login()
+    :param session: Session object returned from brcdapi.brcdapi_auth.login()
     :type session: dict
     :param fid: Logical FID number to be created.
     :type fid: int
@@ -137,9 +139,9 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
 
     # Does the switch already exist?
     switch_list = brcdapi_switch.logical_switches(session, echo)
-    if pyfos_auth.is_error(switch_list):
+    if brcdapi_auth.is_error(switch_list):
         brcdapi_log.log(['Error capturing switch list. Ports not added to FID ' + str(fid),
-                         pyfos_auth.formatted_error_msg(switch_list)], True)
+                         brcdapi_auth.formatted_error_msg(switch_list)], True)
         return -1
     fid_list = [switch_d['fabric-id'] for switch_d in switch_list]
 
@@ -150,8 +152,8 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
         buf = 'Creating FID ' + str(fid) + '. This will take about 20 sec per switch + 25 sec per group of 32 ports.'
         brcdapi_log.log(buf, True)
         obj = brcdapi_switch.create_switch(session, fid, base, ficon, echo)
-        if pyfos_auth.is_error(obj):
-            brcdapi_log.exception(['Error creating FID ' + str(fid), pyfos_auth.formatted_error_msg(obj)], True)
+        if brcdapi_auth.is_error(obj):
+            brcdapi_log.exception(['Error creating FID ' + str(fid), brcdapi_auth.formatted_error_msg(obj)], True)
             return -1
 
     # Set switch configuration parameters. Note: brocade-fibrechannel-switch/fibrechannel-switch requires the WWN and
@@ -175,8 +177,8 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
         sub_content.update({'banner': _DEBUG_BANNER})
     # If there is nothing to update, the library will do nothing and return good status.
     obj = brcdapi_switch.fibrechannel_switch(session, fid, sub_content, None, echo)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.exception(['Failed to configure FID ' + str(fid), pyfos_auth.formatted_error_msg(obj)], True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.exception(['Failed to configure FID ' + str(fid), brcdapi_auth.formatted_error_msg(obj)], True)
         ec = -1
 
     # Set the fabric parameters. Note: Setting up fabric parameters is pretty straight forward so there is no driver
@@ -189,9 +191,9 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
                                         'PATCH',
                                         {'switch-configuration': {'xisl-enabled': False}},
                                         fid)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             ml = ['Failed to disable XISL for FID ' + str(fid),
-                  pyfos_auth.formatted_error_msg(obj),
+                  brcdapi_auth.formatted_error_msg(obj),
                   'Enabling and disabling of XISLs via the API was not supported until FOS v9.0.',
                   'Unless there are other error messages, all other operations are or will be completed as expected.']
             brcdapi_log.exception(ml, True)
@@ -204,9 +206,9 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
                                         'PATCH',
                                         {'fabric': {'insistent-domain-id-enabled': True}},
                                         fid)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             brcdapi_log.exception(['Failed to set insistent domain id for FID ' + str(fid),
-                                   pyfos_auth.formatted_error_msg(obj)], True)
+                                   brcdapi_auth.formatted_error_msg(obj)], True)
             ec = -1
 
     # Add the ports to the switch. This has to be done one FID at a time.
@@ -214,23 +216,23 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
     tl.extend([k for k in ge_ports.keys() if k not in tl])  # Add FIDs for GE ports
     for k in tl:  # For every FID with ports to move
         obj = brcdapi_switch.add_ports(session, fid, k, ports.get(k), ge_ports.get(k), echo)
-        if pyfos_auth.is_error(obj):
-            brcdapi_log.log(['Error adding ports from FID ' + str(k), pyfos_auth.formatted_error_msg(obj)], True)
+        if brcdapi_auth.is_error(obj):
+            brcdapi_log.log(['Error adding ports from FID ' + str(k), brcdapi_auth.formatted_error_msg(obj)], True)
             ec = -1
 
     # Enable the switch
     if es is not None and es:
         obj = brcdapi_switch.fibrechannel_switch(session, fid, {'is-enabled-state': True}, None, echo)
-        if pyfos_auth.is_error(obj):
-            brcdapi_log.log(['Failed to enable FID ' + str(fid), pyfos_auth.formatted_error_msg(obj)], True)
+        if brcdapi_auth.is_error(obj):
+            brcdapi_log.log(['Failed to enable FID ' + str(fid), brcdapi_auth.formatted_error_msg(obj)], True)
             ec = -1
 
     # Enable the ports we just added
     if ep is not None and ep:
         for k in tl:
             obj = brcdapi_port.enable_port(session, fid, True, ports.get(k) + ge_ports.get(k), True)
-            if pyfos_auth.is_error(obj):
-                brcdapi_log.log(['Failed to enable ports on FID ' + str(fid), pyfos_auth.formatted_error_msg(obj)],
+            if brcdapi_auth.is_error(obj):
+                brcdapi_log.log(['Failed to enable ports on FID ' + str(fid), brcdapi_auth.formatted_error_msg(obj)],
                                 True)
                 ec = -1
 
@@ -242,7 +244,7 @@ def _parse_ports(session, fid, i_ports, i_ge_ports, echo):
     only. It creates a dictionary, key is the FID number and value is the list of ports. This dictionary is used in
     ls_create() to determine the ports associated with each FID that is to be moved to the new FID.
 
-    :param session: Session object returned from brcdapi.pyfos_auth.login()
+    :param session: Session object returned from brcdapi.brcdapi_auth.login()
     :type session: dict
     :param fid: Logical FID number to be created.
     :type fid: int
@@ -311,9 +313,9 @@ def _parse_ports(session, fid, i_ports, i_ge_ports, echo):
 
         # Step 2: Read the port list for each FID
         switch_list = brcdapi_switch.logical_switches(session, echo)
-        if pyfos_auth.is_error(switch_list):
+        if brcdapi_auth.is_error(switch_list):
             brcdapi_log.log(['Error capturing switch list. Ports not added to FID ' + str(fid),
-                             pyfos_auth.formatted_error_msg(switch_list)], True)
+                             brcdapi_auth.formatted_error_msg(switch_list)], True)
 
         # Step 3: Build the dictionaries for input to brcdapi_switch.add_ports()
         else:
@@ -455,8 +457,8 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
-        brcdapi_log.log(['Login failed. API error message is:', pyfos_auth.formatted_error_msg(session)], True)
+    if brcdapi_auth.is_error(session):
+        brcdapi_log.log(['Login failed. API error message is:', brcdapi_auth.formatted_error_msg(session)], True)
         return -1
     brcdapi_log.log('Login succeeded.', True)
 
@@ -474,8 +476,8 @@ def pseudo_main():
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log(['Logout failed. API error message is:',  pyfos_auth.formatted_error_msg(obj)], True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log(['Logout failed. API error message is:',  brcdapi_auth.formatted_error_msg(obj)], True)
     return ec
 
 ###################################################################

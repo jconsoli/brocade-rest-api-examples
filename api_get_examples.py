@@ -25,7 +25,10 @@
     evaluate responses. To just print responses to the log and console, you can launch from a command shell (DOS Window
     for Windows environments) with the -d option.
 
-    Search for "chassis_rest_data" to modify chassis level requests and "fid_rest_data" to modify switch level requests.
+    Search for "_chassis_rest_data" to modify chassis level requests and "fid_rest_data" to modify switch level
+    requests.
+
+    cli_poll_to_api.py began as a copy of this module. Many comments were added for people familiar with the CLI.
 
 Version Control::
 
@@ -43,34 +46,35 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.3     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.4     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2019, 2020, 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.3'
+__version__ = '3.0.4'
 
-from pprint import pformat
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
-_DEBUG = False   # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_OUTF, and _DEBUG_VERBOSE
-_DEBUG_IP = '10.38.46.97'
+_DEBUG = True   # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_OUTF, and _DEBUG_VERBOSE
+_DEBUG_IP = '10.xxx.x.xxx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
-_DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
+_DEBUG_SEC = None  # 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
 _DEBUG_FID = '128'
 _DEBUG_VERBOSE = True  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_LOG = '_logs'
 _DEBUG_NL = False
 
-chassis_rest_data = [
+_chassis_rest_data = [
     # 'logical-switch/fibrechannel-logical-switch',  # Deprecated in FOS 8.2.1b. See below for replacement
     'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',
     'brocade-chassis/chassis',
@@ -211,18 +215,18 @@ def pseudo_main():
 
     # Login
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
-        brcdapi_log.log('Login failed:\n' + pyfos_auth.formatted_error_msg(session), True)
+    if brcdapi_auth.is_error(session):
+        brcdapi_log.log('Login failed:\n' + brcdapi_auth.formatted_error_msg(session), True)
         return -1
 
     # Get the Chassis data
     brcdapi_log.log('Chassis Data\n------------', True)
-    for uri in chassis_rest_data:
+    for uri in _chassis_rest_data:
         try:
             obj = brcdapi_rest.get_request(session, uri)
-            if pyfos_auth.is_error(obj):  # Set breakpoint here to inspect response
-                brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
-        except:
+            if brcdapi_auth.is_error(obj):  # Set breakpoint here to inspect response
+                brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
+        except:  # Bare because I'm not debugging other libraries or FOS API errors.
             brcdapi_log.exception('Error requesting ' + uri, True)
 
     # Get the Switch data
@@ -233,15 +237,15 @@ def pseudo_main():
             brcdapi_log.log('URI: ' + buf, True)
             try:
                 obj = brcdapi_rest.get_request(session, buf, vf_id)
-                if pyfos_auth.is_error(obj):  # Set breakpoint here to inspect response
-                    brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
-            except:
+                if brcdapi_auth.is_error(obj):  # Set breakpoint here to inspect response
+                    brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
+            except:  # Bare because I'm not debugging other libraries or FOS API errors.
                 brcdapi_log.exception('Error requesting ' + uri, True)
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
         return -1
 
     return 0

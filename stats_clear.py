@@ -32,28 +32,30 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 13 Feb 2021   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 import brcdapi.port as brcdapi_port
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_IP = '10.8.105.10'
+_DEBUG_IP = '10.xxx.x.xxx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
-_DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
+_DEBUG_SEC = None  # 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
 _DEBUG_FID = '128'
 _DEBUG_VERBOSE = False  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_LOG = '_logs'
@@ -63,7 +65,7 @@ _DEBUG_NL = False
 def get_ge_port_list(session, fid):
     """Returns the list of GE ports in a logical switch
 
-    :param session: Session object returned from brcdapi.pyfos_auth.login()
+    :param session: Session object returned from brcdapi.brcdapi_auth.login()
     :type session: dict
     :param fid: Logical switch FID number
     :type fid: int
@@ -72,8 +74,8 @@ def get_ge_port_list(session, fid):
     """
     obj = brcdapi_rest.get_request(
         session, 'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch/fabric-id/' + str(fid))
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         return list()
     if 'fibrechannel-logical-switch' in obj and 'ge-port-member-list' in obj['fibrechannel-logical-switch']:
         pl = obj['fibrechannel-logical-switch']['ge-port-member-list'].get('port-member')
@@ -148,9 +150,9 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
     brcdapi_log.log('Login succeeded', True)
 
@@ -160,7 +162,7 @@ def pseudo_main():
         # Get FC port list for this FID by reading the configurations
         kpi = 'brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)
             ec = -1
 
@@ -172,9 +174,9 @@ def pseudo_main():
             # Clear stats for all FC and GE ports
             brcdapi_log.log('Clearing statistics for all ports of fid: ' + str(fid), True)
             obj = brcdapi_port.clear_stats(session, fid, fc_plist, ge_plist)
-            if pyfos_auth.is_error(obj):
+            if brcdapi_auth.is_error(obj):
                 brcdapi_log.log('Error clearing stats for ports for FID ' + str(fid), True)
-                brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+                brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
                 ec = -1
             else:
                 brcdapi_log.log('Successfully cleared stats for all ports for FID ' + str(fid), True)
@@ -185,8 +187,8 @@ def pseudo_main():
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
     return ec
 
 

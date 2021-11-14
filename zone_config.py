@@ -31,18 +31,20 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.2     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2019, 2020, 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 import brcdapi.zone as brcdapi_zone
 
@@ -108,17 +110,17 @@ _DEBUG_VERBOSE = False  # When True, all content and responses are formatted and
 def _is_error(session, fid, obj):
     """Tests to see if the API returned an error and aborts the zoning transaction if it did
 
-    :param session: Session object returned from brcdapi.pyfos_auth.login()
+    :param session: Session object returned from brcdapi.brcdapi_auth.login()
     :type session: dict
     :param fid: Logical FID number to be created. Valid FISs are 1-128. Will return an error if the FID already exists
     :type fid: int
     :return: True if an error was returned
     :rtype: bool
     """
-    if pyfos_auth.is_error(obj):
+    if brcdapi_auth.is_error(obj):
         # Commented out code below is redundant because brcdapi.zone methods already print formatted error messages to
         # the log. Should you need to format error objects into human readable text:
-        # brcdapi_log.log(pyfos_auth.formatted_error_msg(obj), True)
+        # brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         brcdapi_zone.abort(session, fid, True)
         return True
     else:
@@ -128,12 +130,12 @@ def _is_error(session, fid, obj):
 def _logout(session):
     """Logout and post message if the logout failed
 
-    :param session: Session object returned from brcdapi.pyfos_auth.login()
+    :param session: Session object returned from brcdapi.brcdapi_auth.login()
     :type session: dict
     """
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed:\n' + pyfos_auth.formatted_error_msg(obj), True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
 
 
 def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
@@ -163,9 +165,9 @@ def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
+    if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
-        brcdapi_log.log(pyfos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
         return -1
     brcdapi_log.log('Login succeeded', True)
 

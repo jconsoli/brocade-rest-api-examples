@@ -57,25 +57,27 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.2     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '13 Feb 2021'
+__date__ = '14 Nov 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
-import brcdapi.pyfos_auth as pyfos_auth
+import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 import brcdapi.switch as brcdapi_switch
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_OUTF, and _DEBUG_VERBOSE
-_DEBUG_IP = '10.8.105.10'
+_DEBUG_IP = 'xx.x.xxx.xx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
@@ -152,7 +154,7 @@ def pseudo_main():
         fid = int(fid)
         if fid < 1 or fid > 128:
             raise
-    except:
+    except ValueError:
         brcdapi_log.log('Invalid fid. FID must be an integer between 1-128', True)
         return -1
     ml.append('FID:       ' + str(fid))
@@ -162,8 +164,8 @@ def pseudo_main():
     # Login
     brcdapi_log.log('Attempting login', True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
-    if pyfos_auth.is_error(session):
-        brcdapi_log.log(['Login failed. API error message is:', pyfos_auth.formatted_error_msg(session)], True)
+    if brcdapi_auth.is_error(session):
+        brcdapi_log.log(['Login failed. API error message is:', brcdapi_auth.formatted_error_msg(session)], True)
         return -1
     brcdapi_log.log('Login succeeded.', True)
 
@@ -172,20 +174,20 @@ def pseudo_main():
         buf = 'Deleting FID ' + str(fid) + '. This will take about 20 sec per switch + 25 sec per group of 32 ports.'
         brcdapi_log.log(buf, True)
         obj = brcdapi_switch.delete_switch(session, fid, echo)
-        if pyfos_auth.is_error(obj):
+        if brcdapi_auth.is_error(obj):
             ml = ['Error deleting FID ' + str(fid)]
-            ml.append(pyfos_auth.formatted_error_msg(obj))
+            ml.append(brcdapi_auth.formatted_error_msg(obj))
             brcdapi_log.log(ml, True)
             ec = -1
 
-    except:
+    except:  # Bare because I don't care what went wrong. I just want to logout
         brcdapi_log.log('Encountered a programming error', True)
         ec = -1
 
     # Logout
     obj = brcdapi_rest.logout(session)
-    if pyfos_auth.is_error(obj):
-        brcdapi_log.log(['Logout failed. API error message is:',  pyfos_auth.formatted_error_msg(obj)], True)
+    if brcdapi_auth.is_error(obj):
+        brcdapi_log.log(['Logout failed. API error message is:',  brcdapi_auth.formatted_error_msg(obj)], True)
     return ec
 
 ###################################################################
