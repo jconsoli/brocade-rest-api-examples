@@ -56,7 +56,7 @@ that contains:
 
 * Conditional imports are ignored
 * Imports using importlib are ignored
-* Comments preceeded with '#' are ignored but a line beginning with "import" or "from" inside tripple quote comments are
+* Comments preceded with '#' are ignored but a line beginning with "import" or "from" inside triple quote comments are
   handled as though they were not in a comment.
 * Only imports from the line the import statement is included in is included. If the import statement continues to the
   next line, the imported modules from the next line are ignored.
@@ -72,55 +72,59 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.1     | 17 Jul 2021   | Added date and time stamp. Added Python version. Added -h help message.           |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.2     | 31 Dec 2021   | Improved messaging.                                                               |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '17 Jul 2021'
+__date__ = '31 Dec 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 import sys
 import os
 import importlib
 try:
     import platform
-except:
+except ModuleNotFoundError:
     print('Could not import platform')
 try:
     import datetime
     print('\n' + datetime.datetime.now().strftime('%d %b %Y %H:%M:%S'))
-except:
+except ModuleNotFoundError:
     print('Could not import datetime')
 
 _DOC_STRING = False  # Should always be False. Prohibits any importing. Only useful for building documentation
 _DEBUG_argv = None  # ['lib_check.py', 'test_2.py']
 
-_help_msg = ('',
-                'This utility reads a Python script, or list of Python',
-                'scripts, and performs the following actions:',
-                '',
-                '* Determines the OS, release, and version',
-                '* Determines the Python library paths',
-                '* Finds all import statements in the script(s)',
-                '* Checks the access rights for imported scripts',
-                '* Attempts to import the packages',
-                '* Recursively reads all imported modules and',
-                '  validates those modules as well',
-                '* When available, reports the version of each',
-                '  module and the specific library path actually used',
-                '',
-                'Example:',
-                '',
-                'python lib_validate.py script1.py script1.py',
-                '',
-                'Note: Do not use a comma to seperate multiple',
-                '  scripts on the CLI. If a script has spaces in the',
-                ' name, encapsulate it with quotation marks,'
-                '"my scipt.py"',
-                '')
+_help_msg = (
+    '',
+    'This utility reads a Python script, or list of Python',
+    'scripts, and performs the following actions:',
+    '',
+    '* Determines the OS, release, and version',
+    '* Determines the Python library paths',
+    '* Finds all import statements in the script(s)',
+    '* Checks the access rights for imported scripts',
+    '* Attempts to import the packages',
+    '* Recursively reads all imported modules and',
+    '  validates those modules as well',
+    '* When available, reports the version of each',
+    '  module and the specific library path actually used',
+    '',
+    'Example:',
+    '',
+    'python lib_validate.py script1.py script1.py',
+    '',
+    'Note: Do not use a comma to seperate multiple',
+    '  scripts on the CLI. If a script has spaces in the',
+    ' name, encapsulate it with quotation marks,'
+    '"my scipt.py"',
+    ''
+)
 
 
 def _remove_duplicates(obj_list):
@@ -150,7 +154,6 @@ def _lib_search(lib_d, folder, file, f_flag=False):
     if len(temp_l) == 0 or temp_l[0] == 'os':
         return rl
     last_file = temp_l.pop()
-    sub_folder = '\\'.join(temp_l)
 
     search_d = _get_d(lib_d, folder.split('\\') + temp_l)
     if search_d is None:
@@ -192,13 +195,13 @@ def _import_file_report(lib_d, lib_l, import_files):
             print('  Import:    Success')
             try:
                 ver = mod.__version__
-            except:
+            except AttributeError:
                 pass
             try:
                 path = os.path.abspath(mod.__file__)
-            except:
+            except AttributeError:
                 pass
-        except:
+        except ModuleNotFoundError:
             print('  Import:    Failed')
 
         # Write out the file attributes
@@ -219,20 +222,20 @@ def _import_file_report(lib_d, lib_l, import_files):
 def _get_os_and_lib_paths():
     try:
         operating_system = platform.system()
-    except:
-        operating_system = 'Unknown'
+    except BaseException as e:
+        operating_system = 'Exception ' + str(e) + ' from platform.system()'
     try:
         rel = platform.release()
-    except:
-        rel = 'Unknown'
+    except BaseException as e:
+        rel = 'Exception ' + str(e) + ' from platform.release()'
     try:
         ver = platform.version()
-    except:
-        ver = 'Unknown'
+    except BaseException as e:
+        ver = 'Exception ' + str(e) + ' from platform.version()'
     try:
         pl = sys.path
-    except:
-        pl = ['Unknown']
+    except BaseException as e:
+        pl = ['Exception ' + str(e) + ' from sys.path']
 
     return pl, operating_system, rel, ver
 
@@ -298,9 +301,9 @@ def read_directory(folder):
             try:
                 if os.path.isfile(full_path) and '~$' not in file:
                     rl.append(file)
-            except:
+            except PermissionError:
                 pass  # It's probably a system file
-    except:
+    except PermissionError:
         pass  # It's a protected folder. Usually system folders
 
     return rl
@@ -318,7 +321,7 @@ def read_full_directory(folder, skip_sys=False):
     temp_l = list()
     try:
         temp_l = [os.path.join(folder, f) for f in os.listdir(folder)]
-    except:
+    except PermissionError:
         pass  # It's a protected folder. Usually system folders
     folder_l = list()
     for new_folder in [f for f in temp_l if not os.path.isfile(f)]:
@@ -328,7 +331,7 @@ def read_full_directory(folder, skip_sys=False):
                 if '~$' not in new_folder:  # '-$' is a temporary Windows file that sometimes shows up
                     if not skip_sys or (len(new_folder) > 0 and new_folder[0] != '$'):
                         folder_l.append(full_path)
-        except:
+        except PermissionError:
             pass  # This happens when the user doesn't have access to a file system
     for new_folder in folder_l:
         rl.extend(read_full_directory(new_folder, skip_sys=True))
@@ -348,11 +351,11 @@ def _python_ver():
             if int(ol[0]) != 3 or int(ol[1]) < 3:
                 msg += '\nWARNING: Unsupported version of Python. Python must be version  3.3 or higher.'
             else:
-                msg += '\nPython version OK'
-        except:
-            msg += '\nInvalid version returned from sys.version'
-    except:
-        msg += 'Unable to read sys.version'
+                msg += '\nWARNING: Unknown version of Python: ' + str(ver)
+        except (TypeError, IndexError, ValueError):
+            msg += '\nWARNING: Unknown version of Python: ' + str(ver)
+    except BaseException as e:
+        msg += '\nException ' + str(e) + ' returned from sys.version'
 
     return msg
 
@@ -426,7 +429,7 @@ def _recursive_imports(lib_d, lib_l, cant_read_l, folder, file, in_file_d=None):
             in_file_d.update(dict(_read=True))  # Different modules often import the same libraries. Only check once
         for buf in [b for b in content if 'import ' in b]:
             rl.extend(_clean_import_line(buf))
-    except:
+    except PermissionError:
         if in_file_d is None:
             cant_read_l.append(file)
         else:
@@ -435,8 +438,7 @@ def _recursive_imports(lib_d, lib_l, cant_read_l, folder, file, in_file_d=None):
     # Read all the imported files
     for lib_folder in lib_l:
 
-        # Debug
-        if 'JetBrains' in lib_folder:
+        if 'JetBrains' in lib_folder:  # This happens when using my IDE
             continue
 
         for import_file in rl:
@@ -458,9 +460,10 @@ def pseudo_main():
         print('WARNING: Debug mode.')
     try:
         temp_l = sys.argv if _DEBUG_argv is None else _DEBUG_argv
-    except:
-        print('Can\'t find sys library')
+    except BaseException as e:
+        print('Can\'t find sys library. Exception is: ' + str(e))
         return
+
     argv = list()
     print('\nTEST\n')
     for buf in temp_l:
