@@ -1,5 +1,11 @@
 # brocade-rest-api-examples
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
+
+**Updated 31 Dec 2021**
+
+* Several comments and user messaging improved
+* Replaced all bare exception clauses with explicit exceptions
+
 **api_examples**
 
 Contains Python script examples on how to use the FOS Rest API with the brcdapi FOS Rest API drivers.
