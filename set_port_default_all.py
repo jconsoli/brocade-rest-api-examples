@@ -33,15 +33,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.1     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.2     | 31 Dec 2021   | Updated comments only.                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '14 Nov 2021'
+__date__ = '31 Dec 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -175,10 +177,10 @@ def pseudo_main():
 #                    Main Entry Point
 #
 ###################################################################
-_ec = 0
 if _DOC_STRING:
-    print('_DOC_STRING is True. No processing')
-else:
-    _ec = pseudo_main()
-    brcdapi_log.close_log('Processing complete. Exit status: ' + str(_ec), True)
+    print('_DOC_STRING set. No processing')
+    exit(0)
+
+_ec = pseudo_main()
+brcdapi_log.close_log('Processing Complete. Exit code: ' + str(_ec))
 exit(_ec)
