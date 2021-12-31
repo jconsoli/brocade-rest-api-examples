@@ -143,7 +143,7 @@
 **Porting BNA to SANnav or FOS API**
 
     Many of the features that were supported by Network Advisor shifted to the FOS API. Furthermore, there are
-    significant differences between the SANnav API and the Netowrk Advisor API. SANnav does has Kafka streams for
+    significant differences between the SANnav API and the Network Advisor API. SANnav does has Kafka streams for
     port statistics. If all you are polling for is port statistics, in most cases setting up a Kafka receiver is the
     better way to monitor port statistics. You probably will still need to do an initial poll or slower poll of the
     switch directly via the FOS API interface to pick up port configuration details and other information typically
@@ -197,15 +197,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 14 Nov 2021   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 31 Dec 2021   | Use explicit exception clauses                                                    |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '14 Nov 2021'
+__date__ = '31 Dec 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import pprint
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -216,7 +218,7 @@ import brcdapi.util as brcdapi_util
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG_IP = '10.xxx.x.xxx'
 _DEBUG_ID = 'admin'
-_DEBUG_PW = 'Pass@word1!'
+_DEBUG_PW = 'password'
 _DEBUG_SEC = None  # None or 'none' for HTTP, 'self' for self signed certificates. Otherwise, the certificate
 """What the rest of these global variables do:
 +-------------------+-------------------------------------------------------------------------------------------+
@@ -363,7 +365,7 @@ _switch_rest_data = [
     'brocade-extension-tunnel/extension-tunnel-statistics',
     'brocade-fibrechannel-diagnostics/fibrechannel-diagnostics',
     'brocade-security/auth-spec',
-    'brocadefibrechannel/topology-domain',  # topologyshow
+    'brocade-fibrechannel/topology-domain',  # topologyshow
     'brocade-ficon/logical-path',  # ficonshow
     'brocade-ficon/cup',  # ficoncupshow
     'brocade-ficon/logical-path',    # ficonshow
@@ -372,6 +374,7 @@ _switch_rest_data = [
     'brocade-ficon/lirr',    # ficonshow
     'brocade-ficon/rlir',    # ficonshow
 ]
+
 
 def _setup_log(folder, no_log):
     """Demonstrate setup and provide examples on use of the logging methods
@@ -400,7 +403,7 @@ def _setup_log(folder, no_log):
         
     # exception() precedes the message, or list of message, with a stack trace, calls log(), and flushes the file cache.
     if _DEBUG_EXCEPTION:
-        buf = 'Ignore the preceding stack trace. It is to illustrate the use of the brcdapi.log.expection() method only.'
+        buf = 'Ignore the preceding stack trace. It is only to illustrate the use of the brcdapi.log.expection() method'
         brcdapi_log.exception(buf, True)
 
 
@@ -537,15 +540,15 @@ def pseudo_main():
         for fid in fid_list:
             _get_switch_data(session, fid)
 
-    except:  # Bare except because I don't care what the error is. I just want to fall through an logout
-        brcdapi_log.log('Encountered a programming error.', True)
+    except BaseException as e:
+        brcdapi_log.log(['Encountered a programming error.', 'Exception is: ' + str(e)], True)
         ec = -1
 
     # Logout
     obj = brcdapi_rest.logout(session)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log(['Logout failed:', brcdapi_auth.formatted_error_msg(obj)], True)
-        rec = -1
+        ec = -1
 
     return ec
 
@@ -555,6 +558,10 @@ def pseudo_main():
 #                    Main Entry Point
 #
 ###################################################################
+if _DOC_STRING:
+    print('_DOC_STRING set. No processing')
+    exit(0)
 
-if not _DOC_STRING:
-    brcdapi_log.close_log('Processing Complete. Exit code: ' + str(pseudo_main()), True)
+_ec = pseudo_main()
+brcdapi_log.close_log('Processing Complete. Exit code: ' + str(_ec))
+exit(_ec)

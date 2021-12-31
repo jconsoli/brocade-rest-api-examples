@@ -32,12 +32,12 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | Version   | Last Edit     | Description                                                                       |
     +===========+===============+===================================================================================+
-    | 1.0.0     | xx xxx 2021   | Initial Launch                                                                    |
+    | 1.0.0     | xx xxx 2022   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = 'xx xxx 2021'
+__date__ = 'xx xxx 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
@@ -237,10 +237,10 @@ def pseudo_main():
 #
 ###################################################################
 
-_ec = 0
 if _DOC_STRING:
     print('_DOC_STRING set. No processing')
-else:
-    _ec = pseudo_main()
-    brcdapi_log.close_log('Processing Complete. Exit code: ' + str(_ec), True)
+    exit(0)
+
+_ec = pseudo_main()
+brcdapi_log.close_log('Processing Complete. Exit code: ' + str(_ec))
 exit(_ec)

@@ -30,16 +30,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.4     | 31 Dec 2021   | Updated comments only.                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '14 Nov 2021'
+__date__ = '31 Dec 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.3'
+__version__ = '3.0.4'
 
 import argparse
 import brcdapi.log as brcdapi_log
@@ -49,12 +51,13 @@ import brcdapi.fos_auth as brcdapi_auth
 
 _DOC_STRING = False  # Should always be False. Prohibits any code execution. Only useful for building documentation
 _DEBUG = False  # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, AND _DEBUG_OUTF instead of passed arguments
-_DEBUG_IP = 'xx.xx.xx.xx'
+_DEBUG_IP = 'xx.xxx.x.xxx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = None  # 'self'
 _DEBUG_LOG = '_logs'
 _DEBUG_NL = False
+
 
 def parse_args():
     """Parses the module load command line
@@ -87,7 +90,7 @@ def parse_args():
     return args.ip, args.id, args.pw, args.s, args.log, args.nl
 
 
-def psuedo_main():
+def pseudo_main():
     """Basically the main(). Did it this way so it can easily be used as a standalone module or called from another.
 
     :return: Exit code. See exist codes in brcddb.brcddb_common
@@ -113,7 +116,7 @@ def psuedo_main():
         return -1
 
     # Logout
-    brcdapi_log.log('Login succeeded. Attempting logout', True)
+    brcdapi_log.log(['Login succeeded.', 'Attempting logout'], True)
     obj = brcdapi_rest.logout(session)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log('Logout failed. Error message is:', True)
@@ -130,7 +133,8 @@ def psuedo_main():
 ###################################################################
 if _DOC_STRING:
     print('_DOC_STRING is True. No processing')
-else:
-    _ec = psuedo_main()
-    brcdapi_log.close_log(str(_ec), True)
-    exit(_ec)
+    exit(0)
+
+_ec = pseudo_main()
+brcdapi_log.close_log(str(_ec))
+exit(_ec)

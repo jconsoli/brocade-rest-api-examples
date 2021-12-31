@@ -48,15 +48,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.4     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.5     | 31 Dec 2021   | Use explicit exception clauses                                                    |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2019, 2020, 2021 Jack Consoli'
-__date__ = '14 Nov 2021'
+__date__ = '31 Dec 2021'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.4'
+__version__ = '3.0.5'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -64,15 +66,15 @@ import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
-_DEBUG = True   # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_OUTF, and _DEBUG_VERBOSE
-_DEBUG_IP = '10.xxx.x.xxx'
-_DEBUG_ID = 'admin'
-_DEBUG_PW = 'password'
-_DEBUG_SEC = None  # 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
-_DEBUG_FID = '128'
-_DEBUG_VERBOSE = True  # When True, all content and responses are formatted and printed (pprint).
-_DEBUG_LOG = '_logs'
-_DEBUG_NL = False
+_DEBUG = False   # When True, use _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_OUTF, and _DEBUG_d
+_DEBUG_ip = 'xx.xxx.x.xxx'
+_DEBUG_id = 'admin'
+_DEBUG_pw = 'password'
+_DEBUG_sec = None  # 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
+_DEBUG_fid = '128'
+_DEBUG_d = False  # When True, all content and responses are formatted and printed (pprint).
+_DEBUG_log = '_logs'
+_DEBUG_nl = False
 
 _chassis_rest_data = [
     # 'logical-switch/fibrechannel-logical-switch',  # Deprecated in FOS 8.2.1b. See below for replacement
@@ -173,10 +175,10 @@ def parse_args():
     :return: ip, id, pw, file
     :rtype: (str, str, str, str)
     """
-    global _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_SEC, _DEBUG_FID, _DEBUG_VERBOSE, _DEBUG_LOG, _DEBUG_NL
+    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_d, _DEBUG_log, _DEBUG_nl
 
     if _DEBUG:
-        return _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_SEC, _DEBUG_FID, _DEBUG_VERBOSE, _DEBUG_LOG, _DEBUG_NL
+        return _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_d, _DEBUG_log, _DEBUG_nl
     else:
         parser = argparse.ArgumentParser(description='GET request examples.')
         parser.add_argument('-ip', help='IP address', required=True)
@@ -187,8 +189,8 @@ def parse_args():
         parser.add_argument('-s', help="(Optional) Default is HTTP. CA or self for HTTPS mode.", required=False,)
         buf = 'Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
-        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log ' \
-              'file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
+        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The ' \
+              'log file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
         parser.add_argument('-log', help=buf, required=False, )
         buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
@@ -222,25 +224,25 @@ def pseudo_main():
     # Get the Chassis data
     brcdapi_log.log('Chassis Data\n------------', True)
     for uri in _chassis_rest_data:
+        brcdapi_log.log('URI: ' + uri, True)
         try:
             obj = brcdapi_rest.get_request(session, uri)
             if brcdapi_auth.is_error(obj):  # Set breakpoint here to inspect response
                 brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
-        except:  # Bare because I'm not debugging other libraries or FOS API errors.
-            brcdapi_log.exception('Error requesting ' + uri, True)
+        except BaseException as e:
+            brcdapi_log.exception(['Error requesting ' + uri, 'Exception: ' + str(e)], True)
 
     # Get the Switch data
     for vf_id in fl:
         brcdapi_log.log('Switch data. FID: ' + str(vf_id) + '\n---------------------', True)
         for buf in fid_rest_data:
-            brcdapi_log.log('', True)
             brcdapi_log.log('URI: ' + buf, True)
             try:
                 obj = brcdapi_rest.get_request(session, buf, vf_id)
                 if brcdapi_auth.is_error(obj):  # Set breakpoint here to inspect response
                     brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
-            except:  # Bare because I'm not debugging other libraries or FOS API errors.
-                brcdapi_log.exception('Error requesting ' + uri, True)
+            except BaseException as e:
+                brcdapi_log.exception(['Error requesting ' + buf, 'Exception: ' + str(e)], True)
 
     # Logout
     obj = brcdapi_rest.logout(session)
@@ -256,6 +258,10 @@ def pseudo_main():
 #                    Main Entry Point
 #
 ###################################################################
+if _DOC_STRING:
+    print('_DOC_STRING set. No processing')
+    exit(0)
 
-if not _DOC_STRING:
-    brcdapi_log.close_log('Processing Complete. Exit code: ' + str(pseudo_main()), True)
+_ec = pseudo_main()
+brcdapi_log.close_log('Processing Complete. Exit code: ' + str(_ec))
+exit(_ec)
