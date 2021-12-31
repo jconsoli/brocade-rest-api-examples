@@ -30,7 +30,7 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.0.4     | 31 Dec 2021   | Updated comments only.                                                            |
+    | 3.0.4     | 31 Dec 2021   | Updated comments only. No functional changes.                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
@@ -53,7 +53,7 @@ _DOC_STRING = False  # Should always be False. Prohibits any code execution. Onl
 _DEBUG = False  # When True, use _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, AND _DEBUG_OUTF instead of passed arguments
 _DEBUG_IP = 'xx.xxx.x.xxx'
 _DEBUG_ID = 'admin'
-_DEBUG_PW = 'password'
+_DEBUG_PW = 'Password'
 _DEBUG_SEC = None  # 'self'
 _DEBUG_LOG = '_logs'
 _DEBUG_NL = False
@@ -116,7 +116,7 @@ def pseudo_main():
         return -1
 
     # Logout
-    brcdapi_log.log(['Login succeeded.', 'Attempting logout'], True)
+    brcdapi_log.log('Login succeeded. Attempting logout', True)
     obj = brcdapi_rest.logout(session)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log('Logout failed. Error message is:', True)
@@ -136,5 +136,5 @@ if _DOC_STRING:
     exit(0)
 
 _ec = pseudo_main()
-brcdapi_log.close_log(str(_ec))
+brcdapi_log.close_log('Processing complete. Exit code: ' + str(_ec))
 exit(_ec)
