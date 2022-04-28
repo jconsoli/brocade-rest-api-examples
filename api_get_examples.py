@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2019, 2020, 2021 Jack Consoli.  All rights reserved.
+# Copyright 2019, 2020, 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -50,15 +50,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.5     | 31 Dec 2021   | Use explicit exception clauses                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.6     | 28 Apr 2022   | Added "running" to URI                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2019, 2020, 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2019, 2020, 2021, 2022 Jack Consoli'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.5'
+__version__ = '3.0.6'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -78,94 +80,94 @@ _DEBUG_nl = False
 
 _chassis_rest_data = [
     # 'logical-switch/fibrechannel-logical-switch',  # Deprecated in FOS 8.2.1b. See below for replacement
-    'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',
-    'brocade-chassis/chassis',
-    'brocade-chassis/ha-status',
-    'brocade-fru/blade',
-    'brocade-fru/fan',
-    'brocade-fru/power-supply',
-    'brocade-license/license',
-    'brocade-security/auth-spec',
-    # 'brocade-security/ipfilter-policy',
-    # 'brocade-security/ipfilter-rule',
-    # 'brocade-security/user-specific-password-cfg',
-    # 'brocade-security/password-cfg',
-    # 'brocade-security/user-config',
-    # 'brocade-security/radius-server',
-    # 'brocade-security/tacacs-server',
-    # 'brocade-security/ldap-server',
-    # 'brocade-security/ldap-role-map',
-    # 'brocade-security/sec-crypto-cfg-template',
-    # 'brocade-security/sec-crypto-cfg',
-    # 'brocade-security/sshutil',
-    # 'brocade-security/sshutil-key',
-    # 'brocade-security/sshutil-public-key',
-    # 'brocade-security/security-certificate',
-    'brocade-snmp/system',
-    'brocade-snmp/mib-capability',
-    'brocade-snmp/trap-capability',
-    'brocade-snmp/v1-account',
-    'brocade-snmp/v1-trap',
-    'brocade-snmp/v3-account',
-    'brocade-snmp/v3-trap',
-    'brocade-snmp/access-control',
-    'brocade-time/time-zone',
-    'brocade-time/clock-server',
-    # 'brocade-module-version',
+    'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',
+    'running/brocade-chassis/chassis',
+    'running/brocade-chassis/ha-status',
+    'running/brocade-fru/blade',
+    'running/brocade-fru/fan',
+    'running/brocade-fru/power-supply',
+    'running/brocade-license/license',
+    'running/brocade-security/auth-spec',
+    # 'running/brocade-security/ipfilter-policy',
+    # 'running/brocade-security/ipfilter-rule',
+    # 'running/brocade-security/user-specific-password-cfg',
+    # 'running/brocade-security/password-cfg',
+    # 'running/brocade-security/user-config',
+    # 'running/brocade-security/radius-server',
+    # 'running/brocade-security/tacacs-server',
+    # 'running/brocade-security/ldap-server',
+    # 'running/brocade-security/ldap-role-map',
+    # 'running/brocade-security/sec-crypto-cfg-template',
+    # 'running/brocade-security/sec-crypto-cfg',
+    # 'running/brocade-security/sshutil',
+    # 'running/brocade-security/sshutil-key',
+    # 'running/brocade-security/sshutil-public-key',
+    # 'running/brocade-security/security-certificate',
+    'running/brocade-snmp/system',
+    'running/brocade-snmp/mib-capability',
+    'running/brocade-snmp/trap-capability',
+    'running/brocade-snmp/v1-account',
+    'running/brocade-snmp/v1-trap',
+    'running/brocade-snmp/v3-account',
+    'running/brocade-snmp/v3-trap',
+    'running/brocade-snmp/access-control',
+    'running/brocade-time/time-zone',
+    'running/brocade-time/clock-server',
+    # 'running/brocade-module-version',
 ]
 fid_rest_data = [
-    'brocade-fabric/fabric-switch',
-    'brocade-fibrechannel-switch/fibrechannel-switch',
-    'brocade-interface/fibrechannel-statistics',
-    'brocade-interface/fibrechannel',
-    'brocade-interface/extension-ip-interface',
-    'brocade-interface/gigabitethernet',
-    'brocade-interface/gigabitethernet-statistics',
-    'brocade-zone/defined-configuration',
-    'brocade-zone/effective-configuration',
-    'brocade-fdmi/hba',
-    'brocade-fdmi/port',
-    'brocade-name-server/fibrechannel-name-server',
-    'brocade-fibrechannel-configuration/fabric',
-    'brocade-fibrechannel-configuration/port-configuration',
-    'brocade-fibrechannel-configuration/zone-configuration',
-    'brocade-fibrechannel-configuration/switch-configuration',
-    'brocade-fibrechannel-configuration/f-port-login-settings',
-    # 'brocade-fibrechannel-trunk/trunk',
-    # 'brocade-fibrechannel-trunk/performance',
-    # 'brocade-fibrechannel-trunk/trunk-area',
-    'brocade-logging/audit',
-    # 'brocade-logging/syslog-server',
-    # 'brocade-logging/log-quiet-control',
-    # 'brocade-logging/log-setting',
-    'brocade-logging/raslog',
-    'brocade-logging/raslog-module',
-    # 'brocade-logging/rule',    # Requires additional parameters. Not testing this at this time
-    'brocade-maps/maps-config',
-    'brocade-maps/dashboard-misc',
-    'brocade-maps/dashboard-rule',
-    'brocade-maps/group',
-    'brocade-maps/rule',
-    'brocade-maps/maps-policy',
-    'brocade-maps/monitoring-system-matrix',
-    'brocade-maps/switch-status-policy-report',
-    'brocade-maps/paused-cfg',
-    'brocade-maps/system-resources',
-    'brocade-media/media-rdp',
-    # 'brocade-access-gateway/device-list',
-    # 'brocade-access-gateway/f-port-list',
-    # 'brocade-access-gateway/n-port-map',
-    # 'brocade-access-gateway/n-port-settings',
-    # 'brocade-access-gateway/policy',
-    # 'brocade-access-gateway/port-group',
-    # 'brocade-extension-ip-route/extension-ip-route',
-    # 'brocade-extension-ip-route/brocade-extension-ipsec-policy',
-    # 'brocade-extension-tunnel/extension-circuit',
-    # 'brocade-extension-tunnel/extension-circuit-statistics',
-    # 'brocade-extension-tunnel/extension-tunnel',
-    # 'brocade-extension-tunnel/extension-tunnel-statistics',
-    # 'brocade-fibrechannel-diagnostics/fibrechannel-diagnostics',
-    'brocade-security/auth-spec'
+    'running/brocade-fabric/fabric-switch',
+    'running/brocade-fibrechannel-switch/fibrechannel-switch',
+    'running/brocade-interface/fibrechannel-statistics',
+    'running/brocade-interface/fibrechannel',
+    'running/brocade-interface/extension-ip-interface',
+    'running/brocade-interface/gigabitethernet',
+    'running/brocade-interface/gigabitethernet-statistics',
+    'running/brocade-zone/defined-configuration',
+    'running/brocade-zone/effective-configuration',
+    'running/brocade-fdmi/hba',
+    'running/brocade-fdmi/port',
+    'running/brocade-name-server/fibrechannel-name-server',
+    'running/brocade-fibrechannel-configuration/fabric',
+    'running/brocade-fibrechannel-configuration/port-configuration',
+    'running/brocade-fibrechannel-configuration/zone-configuration',
+    'running/brocade-fibrechannel-configuration/switch-configuration',
+    'running/brocade-fibrechannel-configuration/f-port-login-settings',
+    # 'running/brocade-fibrechannel-trunk/trunk',
+    # 'running/brocade-fibrechannel-trunk/performance',
+    # 'running/brocade-fibrechannel-trunk/trunk-area',
+    'running/brocade-logging/audit',
+    # 'running/brocade-logging/syslog-server',
+    # 'running/brocade-logging/log-quiet-control',
+    # 'running/brocade-logging/log-setting',
+    'running/brocade-logging/raslog',
+    'running/brocade-logging/raslog-module',
+    # 'running/brocade-logging/rule',    # Requires additional parameters. Not testing this at this time
+    'running/brocade-maps/maps-config',
+    'running/brocade-maps/dashboard-misc',
+    'running/brocade-maps/dashboard-rule',
+    'running/brocade-maps/group',
+    'running/brocade-maps/rule',
+    'running/brocade-maps/maps-policy',
+    'running/brocade-maps/monitoring-system-matrix',
+    'running/brocade-maps/switch-status-policy-report',
+    'running/brocade-maps/paused-cfg',
+    'running/brocade-maps/system-resources',
+    'running/brocade-media/media-rdp',
+    # 'running/brocade-access-gateway/device-list',
+    # 'running/brocade-access-gateway/f-port-list',
+    # 'running/brocade-access-gateway/n-port-map',
+    # 'running/brocade-access-gateway/n-port-settings',
+    # 'running/brocade-access-gateway/policy',
+    # 'running/brocade-access-gateway/port-group',
+    # 'running/brocade-extension-ip-route/extension-ip-route',
+    # 'running/brocade-extension-ip-route/brocade-extension-ipsec-policy',
+    # 'running/brocade-extension-tunnel/extension-circuit',
+    # 'running/brocade-extension-tunnel/extension-circuit-statistics',
+    # 'running/brocade-extension-tunnel/extension-tunnel',
+    # 'running/brocade-extension-tunnel/extension-tunnel-statistics',
+    # 'running/brocade-fibrechannel-diagnostics/fibrechannel-diagnostics',
+    'running/brocade-security/auth-spec'
     ]
 
 

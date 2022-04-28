@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2021 Jack Consoli.  All rights reserved.
+# Copyright 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -199,15 +199,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.1     | 31 Dec 2021   | Use explicit exception clauses                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.2     | 28 Apr 2022   | Added "running" to URI                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2021, 2022 Jack Consoli'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 import pprint
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -277,102 +279,102 @@ _DEBUG_FOLDER = 'raw_data'  # Can be any valid folder name. The folder is not cr
 # exist. This is where all the json dumps of API requests are read/written.
 
 _chassis_rest_data = [
-    'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',  # switchshow
-    'brocade-chassis/chassis',  # chassisshow
-    'brocade-chassis/ha-status',  # hashow
-    'brocade-fru/blade',  # Blade status as reported with chassisshow
-    'brocade-fru/fan',  # Blower (fan) status as reported with chassisshow
-    'brocade-fru/power-supply',  # Power supply status as reported with chassisshow
-    'brocade-license/license',  # Equivalent to licenseshow. Note that licenseshow has been deprecated in FOS 9.x
-    # 'brocade-security/ipfilter-policy',
-    # 'brocade-security/ipfilter-rule',
-    # 'brocade-security/user-specific-password-cfg',
-    # 'brocade-security/password-cfg',
-    # 'brocade-security/user-config',
-    # 'brocade-security/radius-server',
-    # 'brocade-security/tacacs-server',
-    # 'brocade-security/ldap-server',
-    # 'brocade-security/ldap-role-map',
-    # 'brocade-security/sec-crypto-cfg-template',
-    # 'brocade-security/sec-crypto-cfg',
-    # 'brocade-security/sshutil',
-    # 'brocade-security/sshutil-key',
-    # 'brocade-security/sshutil-public-key',
-    # 'brocade-security/security-certificate',
-    'brocade-snmp/system',
-    'brocade-snmp/mib-capability',
-    'brocade-snmp/trap-capability',
-    'brocade-snmp/v1-account',
-    'brocade-snmp/v1-trap',
-    'brocade-snmp/v3-account',
-    'brocade-snmp/v3-trap',
-    'brocade-snmp/access-control',
-    'brocade-time/time-zone',
-    'brocade-time/clock-server',
-    # 'brocade-module-version',  # This gets executed immediately after login and is attached to the session object
+    'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',  # switchshow
+    'running/brocade-chassis/chassis',  # chassisshow
+    'running/brocade-chassis/ha-status',  # hashow
+    'running/brocade-fru/blade',  # Blade status as reported with chassisshow
+    'running/brocade-fru/fan',  # Blower (fan) status as reported with chassisshow
+    'running/brocade-fru/power-supply',  # Power supply status as reported with chassisshow
+    'running/brocade-license/license',  # Equivalent to licenseshow. Note: licenseshow has been deprecated in FOS 9.x
+    # 'running/brocade-security/ipfilter-policy',
+    # 'running/brocade-security/ipfilter-rule',
+    # 'running/brocade-security/user-specific-password-cfg',
+    # 'running/brocade-security/password-cfg',
+    # 'running/brocade-security/user-config',
+    # 'running/brocade-security/radius-server',
+    # 'running/brocade-security/tacacs-server',
+    # 'running/brocade-security/ldap-server',
+    # 'running/brocade-security/ldap-role-map',
+    # 'running/brocade-security/sec-crypto-cfg-template',
+    # 'running/brocade-security/sec-crypto-cfg',
+    # 'running/brocade-security/sshutil',
+    # 'running/brocade-security/sshutil-key',
+    # 'running/brocade-security/sshutil-public-key',
+    # 'running/brocade-security/security-certificate',
+    'running/brocade-snmp/system',
+    'running/brocade-snmp/mib-capability',
+    'running/brocade-snmp/trap-capability',
+    'running/brocade-snmp/v1-account',
+    'running/brocade-snmp/v1-trap',
+    'running/brocade-snmp/v3-account',
+    'running/brocade-snmp/v3-trap',
+    'running/brocade-snmp/access-control',
+    'running/brocade-time/time-zone',
+    'running/brocade-time/clock-server',
+    # 'running/brocade-module-version',  # Gets executed immediately after login and is attached to the session object
 ]
 
 _switch_rest_data = [
-    'brocade-fabric/fabric-switch',  # chassisshow, firmwareshow, switchshow, version
-    'brocade-fibrechannel-switch/fibrechannel-switch',  # switchshow, configshow, chassisshow
-    'brocade-interface/fibrechannel-statistics',  # portstatshow, portstats64hsow
-    'brocade-interface/fibrechannel',  # switchshow, portshow, portcfgshow
-    'brocade-interface/extension-ip-interface',
-    'brocade-interface/gigabitethernet',
-    'brocade-interface/gigabitethernet-statistics',
-    'brocade-zone/defined-configuration',  # cfgshow, alishow, defzone, zoneshow
-    'brocade-zone/effective-configuration',  # cfgshow, alishow, defzone, zoneshow
-    'brocade-fdmi/hba',  # fdmishow
-    'brocade-fdmi/port',  # fdmishow
-    'brocade-name-server/fibrechannel-name-server',  # nsshow
-    'brocade-fibrechannel-configuration/fabric',  # fabricshow
-    'brocade-fibrechannel-configuration/port-configuration',  # portshow, portcfgshow
-    'brocade-fibrechannel-configuration/zone-configuration',
-    'brocade-fibrechannel-configuration/switch-configuration',  # switchshow
-    'brocade-fibrechannel-configuration/f-port-login-settings',  # portcfgshow
-    'brocade-fibrechannel-trunk/trunk',  # trunkshow
-    'brocade-fibrechannel-trunk/performance',  # trunkshow
-    'brocade-fibrechannel-trunk/trunk-area',  # trunkshow
-    'brocade-logging/audit',  # auditdump
-    # 'brocade-logging/syslog-server',
-    # 'brocade-logging/log-quiet-control',
-    # 'brocade-logging/log-setting',
-    'brocade-logging/raslog',  # errdump
-    'brocade-logging/raslog-module',
-    # 'brocade-logging/rule',    # Requires additional parameters. Not testing this at this time
-    'brocade-maps/maps-config',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/dashboard-misc',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/dashboard-rule',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/group',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/rule',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/maps-policy',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/monitoring-system-matrix',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/switch-status-policy-report',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/paused-cfg',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-maps/system-resources',  # mapspolicy, mapsconfig, mapsrule
-    'brocade-media/media-rdp',  # sfpshow
-    'brocade-access-gateway/device-list',  # agshow
-    'brocade-access-gateway/f-port-list',  # agshow
-    'brocade-access-gateway/n-port-map',  # agshow
-    'brocade-access-gateway/n-port-settings',  # agshow
-    'brocade-access-gateway/policy',  # agshow
-    'brocade-access-gateway/port-group',  # agshow
-    'brocade-extension-ip-route/extension-ip-route',
-    'brocade-extension-ip-route/brocade-extension-ipsec-policy',
-    'brocade-extension-tunnel/extension-circuit',
-    'brocade-extension-tunnel/extension-circuit-statistics',
-    'brocade-extension-tunnel/extension-tunnel',
-    'brocade-extension-tunnel/extension-tunnel-statistics',
-    'brocade-fibrechannel-diagnostics/fibrechannel-diagnostics',
-    'brocade-security/auth-spec',
-    'brocade-fibrechannel/topology-domain',  # topologyshow
-    'brocade-ficon/logical-path',  # ficonshow
-    'brocade-ficon/cup',  # ficoncupshow
-    'brocade-ficon/logical-path',    # ficonshow
-    'brocade-ficon/rnid',    # ficonshow
-    'brocade-ficon/switch-rnid',  # ficonshow
-    'brocade-ficon/lirr',    # ficonshow
-    'brocade-ficon/rlir',    # ficonshow
+    'running/brocade-fabric/fabric-switch',  # chassisshow, firmwareshow, switchshow, version
+    'running/brocade-fibrechannel-switch/fibrechannel-switch',  # switchshow, configshow, chassisshow
+    'running/brocade-interface/fibrechannel-statistics',  # portstatshow, portstats64hsow
+    'running/brocade-interface/fibrechannel',  # switchshow, portshow, portcfgshow
+    'running/brocade-interface/extension-ip-interface',
+    'running/brocade-interface/gigabitethernet',
+    'running/brocade-interface/gigabitethernet-statistics',
+    'running/brocade-zone/defined-configuration',  # cfgshow, alishow, defzone, zoneshow
+    'running/brocade-zone/effective-configuration',  # cfgshow, alishow, defzone, zoneshow
+    'running/brocade-fdmi/hba',  # fdmishow
+    'running/brocade-fdmi/port',  # fdmishow
+    'running/brocade-name-server/fibrechannel-name-server',  # nsshow
+    'running/brocade-fibrechannel-configuration/fabric',  # fabricshow
+    'running/brocade-fibrechannel-configuration/port-configuration',  # portshow, portcfgshow
+    'running/brocade-fibrechannel-configuration/zone-configuration',
+    'running/brocade-fibrechannel-configuration/switch-configuration',  # switchshow
+    'running/brocade-fibrechannel-configuration/f-port-login-settings',  # portcfgshow
+    'running/brocade-fibrechannel-trunk/trunk',  # trunkshow
+    'running/brocade-fibrechannel-trunk/performance',  # trunkshow
+    'running/brocade-fibrechannel-trunk/trunk-area',  # trunkshow
+    'running/brocade-logging/audit',  # auditdump
+    # 'running/brocade-logging/syslog-server',
+    # 'running/brocade-logging/log-quiet-control',
+    # 'running/brocade-logging/log-setting',
+    'running/brocade-logging/raslog',  # errdump
+    'running/brocade-logging/raslog-module',
+    # 'running/brocade-logging/rule',    # Requires additional parameters. Not testing this at this time
+    'running/brocade-maps/maps-config',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/dashboard-misc',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/dashboard-rule',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/group',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/rule',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/maps-policy',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/monitoring-system-matrix',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/switch-status-policy-report',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/paused-cfg',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-maps/system-resources',  # mapspolicy, mapsconfig, mapsrule
+    'running/brocade-media/media-rdp',  # sfpshow
+    'running/brocade-access-gateway/device-list',  # agshow
+    'running/brocade-access-gateway/f-port-list',  # agshow
+    'running/brocade-access-gateway/n-port-map',  # agshow
+    'running/brocade-access-gateway/n-port-settings',  # agshow
+    'running/brocade-access-gateway/policy',  # agshow
+    'running/brocade-access-gateway/port-group',  # agshow
+    'running/brocade-extension-ip-route/extension-ip-route',
+    'running/brocade-extension-ip-route/brocade-extension-ipsec-policy',
+    'running/brocade-extension-tunnel/extension-circuit',
+    'running/brocade-extension-tunnel/extension-circuit-statistics',
+    'running/brocade-extension-tunnel/extension-tunnel',
+    'running/brocade-extension-tunnel/extension-tunnel-statistics',
+    'running/brocade-fibrechannel-diagnostics/fibrechannel-diagnostics',
+    'running/brocade-security/auth-spec',
+    'running/brocade-fibrechannel/topology-domain',  # topologyshow
+    'running/brocade-ficon/logical-path',  # ficonshow
+    'running/brocade-ficon/cup',  # ficoncupshow
+    'running/brocade-ficon/logical-path',    # ficonshow
+    'running/brocade-ficon/rnid',    # ficonshow
+    'running/brocade-ficon/switch-rnid',  # ficonshow
+    'running/brocade-ficon/lirr',    # ficonshow
+    'running/brocade-ficon/rlir',    # ficonshow
 ]
 
 
@@ -432,7 +434,7 @@ def _get_chassis_data(session):
     associated with those logical switches are reported. I broke this out from _chassis_rest_data because we need to
     pick out the fabric IDs of all the logical switches."""
 
-    kpi = 'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch'
+    kpi = 'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch'
     ml = ['', kpi]
     obj = brcdapi_rest.get_request(session, kpi)
     if brcdapi_auth.is_error(obj):

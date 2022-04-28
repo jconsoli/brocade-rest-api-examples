@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2019, 2020, 2021 Jack Consoli.  All rights reserved.
+# Copyright 2019, 2020, 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -30,15 +30,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.5     | 31 Dec 2021   | Updated comments only. No functional changes.                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.6     | 28 Apr 2022   | Added 'running' to URI                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.5'
+__version__ = '3.0.6'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -103,7 +105,7 @@ def _clear_dashboard(session, fid):
     :rtype fid: int
     """
     content = {'clear-data': True}
-    obj = brcdapi_rest.send_request(session, 'brocade-maps/dashboard-misc', 'PUT', content, fid)
+    obj = brcdapi_rest.send_request(session, 'running/brocade-maps/dashboard-misc', 'PUT', content, fid)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         return -1

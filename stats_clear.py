@@ -75,7 +75,7 @@ def get_ge_port_list(session, fid):
     :rtype: list
     """
     obj = brcdapi_rest.get_request(
-        session, 'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch/fabric-id/' + str(fid))
+        session, 'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch/fabric-id/' + str(fid))
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
         return list()
@@ -118,8 +118,8 @@ def parse_args():
         parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=True)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
-        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log ' \
-              'file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
+        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log' \
+              ' file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
         parser.add_argument('-log', help=buf, required=False, )
         buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
@@ -162,7 +162,7 @@ def pseudo_main():
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
 
         # Get FC port list for this FID by reading the configurations
-        kpi = 'brocade-interface/fibrechannel'
+        kpi = 'running/brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
         if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)

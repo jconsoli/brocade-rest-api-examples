@@ -138,7 +138,7 @@ def pseudo_main():
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
 
         # Get FC port list for this FID by reading the configurations
-        kpi = 'brocade-interface/fibrechannel'
+        kpi = 'running/brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
         if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)

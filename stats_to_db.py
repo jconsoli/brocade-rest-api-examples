@@ -38,15 +38,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.2     | 31 Dec 2021   | Updated comments only.                                                            |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.3     | 28 Apr 2022   | Added "running" to URI                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2021, 2022 Jack Consoli'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -166,7 +168,7 @@ def pseudo_main():
     try:
         # Get the switch WWN
         brcdapi_log.log('Capturing chassis Data', True)
-        uri = 'brocade-fibrechannel-logical-switch/fibrechannel-logical-switch'
+        uri = 'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch'
         obj = brcdapi_rest.get_request(session, uri)
         if brcdapi_auth.is_error(obj):
             brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
@@ -187,7 +189,7 @@ def pseudo_main():
             # It's common to keep track of other port information, such as the user friendly name and FC address. Below
             # captures this basic port information.
             brcdapi_log.log('Capturing basic port information.', True)
-            uri = 'brocade-interface/fibrechannel'
+            uri = 'running/brocade-interface/fibrechannel'
             port_info = brcdapi_rest.get_request(session, uri, fid)
             if brcdapi_auth.is_error(port_info):
                 brcdapi_log.log(brcdapi_auth.formatted_error_msg(port_info), True)
@@ -201,7 +203,7 @@ def pseudo_main():
         # Capture the port statistics
         if ec == 0:  # Make sure we didn't encountered any errors above
             brcdapi_log.log('Capturing port statistics', True)
-            uri = 'brocade-interface/fibrechannel-statistics'
+            uri = 'running/brocade-interface/fibrechannel-statistics'
             port_stats = brcdapi_rest.get_request(session, uri, fid)
             if brcdapi_auth.is_error(port_stats):
                 brcdapi_log.log(brcdapi_auth.formatted_error_msg(port_stats), True)

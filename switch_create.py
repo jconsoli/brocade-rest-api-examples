@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2020, 2021 Jack Consoli.  All rights reserved.
+# Copyright 2020, 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -65,15 +65,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.4     | 31 Dec 2021   | Updated comments only.                                                            |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.5     | 28 Apr 2022   | Added "running"                                                                   |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2020, 2021, 2022 Jack Consoli'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.4'
+__version__ = '3.0.5'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -189,7 +191,7 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
         brcdapi_log.log('Changing XISL use in an existing switch is not supported by this utility.', True)
     elif not xisl:  # XISL (ability to use the base switch for ISLs) is enabled by default so we only need to disable it
         obj = brcdapi_rest.send_request(session,
-                                        'brocade-fibrechannel-configuration/switch-configuration',
+                                        'running/brocade-fibrechannel-configuration/switch-configuration',
                                         'PATCH',
                                         {'switch-configuration': {'xisl-enabled': False}},
                                         fid)
@@ -204,7 +206,7 @@ def create_ls(session, fid, name, did, idid, xisl, base, ficon, ports, ge_ports,
     # Insistent domain ID is set automatically with FICON switches. The API returns an error if you try to set it.
     if idid and not ficon:
         obj = brcdapi_rest.send_request(session,
-                                        'brocade-fibrechannel-configuration/fabric',
+                                        'running/brocade-fibrechannel-configuration/fabric',
                                         'PATCH',
                                         {'fabric': {'insistent-domain-id-enabled': True}},
                                         fid)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2021 Jack Consoli.  All rights reserved.
+# Copyright 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -43,15 +43,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.5     | 31 Dec 2021   | Updated comments only. No functional changes.                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.6     | 28 Apr 2022   | Added "running" to URI                                                            |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2021, 2022 Jack Consoli'
+__date__ = '28 Apr 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.5'
+__version__ = '3.0.6'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -96,8 +98,8 @@ def parse_args():
         return _DEBUG_IP, _DEBUG_ID, _DEBUG_PW, _DEBUG_SEC, _DEBUG_FID, _DEBUG_VERBOSE, _DEBUG_LOG, _DEBUG_NL
     else:
         buf = 'Useful as a programming example only on how to make port configuration changes via the '\
-              'brocade-interface/fibrechannel branch. This specific example sets the port name to "port_s_p" and sets '\
-              'LOS_TOV'
+              'running/brocade-interface/fibrechannel branch. This specific example sets the port name to "port_s_p" '\
+              'and sets LOS_TOV'
         parser = argparse.ArgumentParser(description=buf)
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
@@ -150,7 +152,7 @@ def pseudo_main():
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
 
         # Get FC port list for this FID by reading the configurations
-        kpi = 'brocade-interface/fibrechannel'
+        kpi = 'running/brocade-interface/fibrechannel'
         obj = brcdapi_rest.get_request(session, kpi, fid)
         if brcdapi_auth.is_error(obj):
             brcdapi_log.log('Failed to read ' + kpi + ' for fid ' + str(fid), True)
@@ -170,7 +172,7 @@ def pseudo_main():
                 # brocade-interface/fibrechannel
                 pl.append(d)
             # PATCH only changes specified leaves in the content for this URI. It does not replace all resources
-            obj = brcdapi_rest.send_request(session, 'brocade-interface/fibrechannel', 'PATCH', content, fid)
+            obj = brcdapi_rest.send_request(session, 'running/brocade-interface/fibrechannel', 'PATCH', content, fid)
             if brcdapi_auth.is_error(obj):
                 brcdapi_log.log('Error configuring ports for FID ' + str(fid), True)
                 brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
