@@ -6,6 +6,12 @@ Sample scripts to create, delete, and modify switch, port, and zone using the Br
 * Several comments and user messaging improved
 * Replaced all bare exception clauses with explicit exceptions
 
+**Updated 28 Apr 2022**
+
+* Added support for new URIs in FOS 9.1
+* Moved some generic libraries from brcddb to brcdapi
+* Added examples to capture and update security certificates, certs_get and certs_eval
+
 **api_examples**
 
 Contains Python script examples on how to use the FOS Rest API with the brcdapi FOS Rest API drivers.
