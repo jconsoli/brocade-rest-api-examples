@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2021 Jack Consoli.  All rights reserved.
+# Copyright 2021, 2022 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -36,15 +36,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.2     | 31 Dec 2021   | Updated comments only.                                                            |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.3     | 23 Jun 2022   | Renamed GE ports and supporting method, get_ge_port_list(), because there is no   |
+    |           |               | difference when clearing stats.                                                   |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2021, 2022 Jack Consoli'
+__date__ = '23 Jun 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -54,35 +57,14 @@ import brcdapi.port as brcdapi_port
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_IP = '10.xxx.x.xxx'
+_DEBUG_IP = 'xx.xxx.x.xxx'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
 _DEBUG_SEC = None  # 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
-_DEBUG_FID = '128'
+_DEBUG_FID = '1'
 _DEBUG_VERBOSE = False  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_LOG = '_logs'
 _DEBUG_NL = False
-
-
-def get_ge_port_list(session, fid):
-    """Returns the list of GE ports in a logical switch
-
-    :param session: Session object returned from brcdapi.brcdapi_auth.login()
-    :type session: dict
-    :param fid: Logical switch FID number
-    :type fid: int
-    :return: List of GE ports
-    :rtype: list
-    """
-    obj = brcdapi_rest.get_request(
-        session, 'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch/fabric-id/' + str(fid))
-    if brcdapi_auth.is_error(obj):
-        brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
-        return list()
-    if 'fibrechannel-logical-switch' in obj and 'ge-port-member-list' in obj['fibrechannel-logical-switch']:
-        pl = obj['fibrechannel-logical-switch']['ge-port-member-list'].get('port-member')
-        return list() if pl is None else pl
-    return list()
 
 
 def parse_args():
@@ -171,11 +153,10 @@ def pseudo_main():
         else:
             # Get the port lists
             fc_plist = [port.get('name') for port in obj.get('fibrechannel')]
-            ge_plist = get_ge_port_list(session, fid)
 
             # Clear stats for all FC and GE ports
             brcdapi_log.log('Clearing statistics for all ports of fid: ' + str(fid), True)
-            obj = brcdapi_port.clear_stats(session, fid, fc_plist, ge_plist)
+            obj = brcdapi_port.clear_stats(session, fid, fc_plist)
             if brcdapi_auth.is_error(obj):
                 brcdapi_log.log('Error clearing stats for ports for FID ' + str(fid), True)
                 brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), True)
@@ -183,8 +164,8 @@ def pseudo_main():
             else:
                 brcdapi_log.log('Successfully cleared stats for all ports for FID ' + str(fid), True)
 
-    except:
-        brcdapi_log.log('Encountered a programming error', True)
+    except BaseException as e:
+        brcdapi_log.exception('Programming error encountered. Exception is: ' + str(e), True)
         ec = -1
 
     # Logout
