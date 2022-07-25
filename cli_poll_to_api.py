@@ -201,15 +201,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.2     | 28 Apr 2022   | Added "running" to URI                                                            |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.3     | 25 Jul 2022   | Added additional FOS command references.                                          |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021, 2022 Jack Consoli'
-__date__ = '28 Apr 2022'
+__date__ = '25 Jul 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 import pprint
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -317,7 +319,7 @@ _chassis_rest_data = [
 _switch_rest_data = [
     'running/brocade-fabric/fabric-switch',  # chassisshow, firmwareshow, switchshow, version
     'running/brocade-fibrechannel-switch/fibrechannel-switch',  # switchshow, configshow, chassisshow
-    'running/brocade-interface/fibrechannel-statistics',  # portstatshow, portstats64hsow
+    'running/brocade-interface/fibrechannel-statistics',  # portstatshow, portstats64hsow, porterrshow
     'running/brocade-interface/fibrechannel',  # switchshow, portshow, portcfgshow
     'running/brocade-interface/extension-ip-interface',
     'running/brocade-interface/gigabitethernet',
@@ -512,22 +514,7 @@ def pseudo_main():
         brcdapi_log.log('Login Succeeded', echo=True)
 
     """ I always put code after the login and before the logout in between try & except. It is especially useful during
-    code development because if there is a bug in your code, you still logout. If you are new to Python, try says
-    try to execute this code and if an error is encountered, execute what comes after "except:". Its common in
-    Python scripting to just "let it rip" and handle errors in an exception but the intent in that case is that you
-    know what the potential errors will be. Each exception has it's own type. For example, if you attempt to read a
-    file that doesn't exist, the exception code is FileNotFoundError so the code would look something like:
-    
-    try:
-        f = open(file, 'rb')
-    except FileNotFoundError:
-        brcdapi_log('File ' + file + ' not found', True
-          
-    So the idea is that you have some idea about what you are tyring to do. Its a bit of a fau pax in Python to have
-    just "except:". This is referred to as a "bare except". Since this is for code development, I don't care what the
-    exception is. I just want to fall through to ensure I logout. Otherwise, if my script crashed I have to use the CLI
-    to determine what my login session ID is and then use another CLI command to terminate the session. So the bare
-    except below is frowned upon by the purest but, IMO, it's a reasonable in this case."""
+    code development because if there is a bug in your code, you still logout."""
 
     try:
         # Before anything can be done with switches, you need to know what the switches are. Since the order of other
