@@ -36,17 +36,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.2.2     | 04 Sep 2021   | Latest updates.                                                                   |
+    | 3.2.3     | 09 Sep 2021   | Latest updates.                                                                   |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021, 2022 Jack Consoli'
-__date__ = '04 Sep 2022'
+__date__ = '09 Sep 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.2.2'
+__version__ = '3.2.3'
 
 import sys
 import os
@@ -103,7 +103,7 @@ _imports = (
     {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.1'},
     {'l': 'brcdapi.fos_cli', 'd': 'Required by switch_config.py applications.', 'r': '3.0.2'},
     {'l': 'brcdapi.file', 'd': 'Required by modules that perform file I/O.', 'r': '1.0.2'},
-    {'l': 'brcdapi.gen_util', 'd': 'Required by most scripts.', 'r': '1.0.3'},
+    {'l': 'brcdapi.gen_util', 'd': 'Required by most scripts.', 'r': '1.0.4'},
     {'l': 'brcdapi.log', 'd': 'Required by all scripts.', 'r': '3.0.7'},
     {'l': 'brcdapi.port', 'd': 'Required for reading and configuring ports.', 'r': '3.0.6'},
     {'l': 'brcdapi.switch', 'd': 'Required for reading and configuring switches.', 'r': '3.0.6'},
