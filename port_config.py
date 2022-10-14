@@ -142,15 +142,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.7     | 25 Jul 2022   | Added additional port configuration examples.                                     |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.8     | 14 Oct 2022   | Improved help and error messages.                                                 |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021, 2022 Jack Consoli'
-__date__ = '25 Jul 2022'
+__date__ = '14 Oct 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.7'
+__version__ = '3.0.8'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -322,9 +324,8 @@ def _get_input():
             _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_fid, _DEBUG_p, _DEBUG_a, _DEBUG_d, _DEBUG_sup, \
             _DEBUG_log, _DEBUG_nl
     else:
-        buf = 'This module is intended as programming examples only. Providing a shell interface was an expedient '\
-              'because it was a simple copy and paste from other modules that are intended to be run as stand alone '\
-              'utilities. It is assumed that anyone executing this module will do so for experimentation purposes only.'
+        buf = 'Initially developed as programming examples. A shell interface was added to be run as a stand-alone '\
+              'utility to modify port configurations.'
         parser = argparse.ArgumentParser(description=buf)
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
@@ -416,12 +417,12 @@ def pseudo_main():
         return ec
 
     # Login
-    brcdapi_log.log('Attempting login', True)
+    brcdapi_log.log('Attempting login', echo=True)
     session = brcdapi_rest.login(user_id, pw, ip, sec)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log(['Login failed:', brcdapi_auth.formatted_error_msg(session)], echo=True)
         return -1
-    brcdapi_log.log('Login succeeded', True)
+    brcdapi_log.log('Login succeeded', echo=True)
 
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
 
@@ -458,8 +459,10 @@ def pseudo_main():
                 break
             obj = _action_tbl_d[action]['a'](session, fid, port_l)
             if brcdapi_auth.is_error(obj):
-                brcdapi_log.log(['Error executing action ' + action, 'All processing stopped'], echo=True)
-                brcdapi_log.log(brcdapi_auth.formatted_error_msg(obj), echo=True)
+                brcdapi_log.log(['Error executing action ' + action,
+                                 brcdapi_auth.formatted_error_msg(obj),
+                                 'All processing stopped'],
+                                echo=True)
                 ec = -1
             else:
                 brcdapi_log.log('Successfully completed action: ' + action, echo=True)
