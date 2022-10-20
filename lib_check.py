@@ -36,17 +36,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.2.3     | 09 Sep 2021   | Latest updates.                                                                   |
+    | 3.2.4     | 19 Oct 2022   | Latest updates.                                                                   |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021, 2022 Jack Consoli'
-__date__ = '09 Sep 2022'
+__date__ = '19 Oct 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.2.3'
+__version__ = '3.2.4'
 
 import sys
 import os
@@ -98,7 +98,7 @@ _imports = (
     {'d': ''},
     {'d': 'FOS API driver libraries from github/jconsoli - brcdapi.'},
     {'d': ''},
-    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '1.0.4'},
+    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '1.0.5'},
     {'l': 'brcdapi.brcdapi_rest', 'd': 'FOS RESTConf API driver.', 'r': '3.0.8'},
     {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.1'},
     {'l': 'brcdapi.fos_cli', 'd': 'Required by switch_config.py applications.', 'r': '3.0.2'},
@@ -114,7 +114,7 @@ _imports = (
     {'d': ''},
     {'l': 'brcddb.api.interface', 'd': 'Required for all access to the API', 'r': '3.0.8'},
     {'l': 'brcddb.api.zone', 'd': 'Required for zoning applications', 'r': '3.0.6'},
-    {'l': 'brcddb.apps.report', 'd': 'Required for the report.py application', 'r': '3.1.3'},
+    {'l': 'brcddb.apps.report', 'd': 'Required for the report.py application', 'r': '3.1.4'},
     {'l': 'brcddb.apps.zone', 'd': 'Required for the cli_zone.py application', 'r': '3.0.4'},
     {'l': 'brcddb.brcddb_bp', 'd': 'Required for the report.py application', 'r': '3.0.8'},
     {'l': 'brcddb.brcddb_chassis', 'd': 'Required for most brcddb libraries', 'r': '3.0.7'},
