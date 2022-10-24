@@ -144,15 +144,17 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.8     | 14 Oct 2022   | Improved help and error messages.                                                 |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.0.9     | 24 Oct 2022   | Improved error messaging                                                          |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2021, 2022 Jack Consoli'
-__date__ = '14 Oct 2022'
+__date__ = '24 Oct 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.8'
+__version__ = '3.0.9'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -165,13 +167,13 @@ import brcdapi.file as brcdapi_file
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_ip = 'xx.xxx.xx.xx'
+_DEBUG_ip = '10.155.2.69'
 _DEBUG_id = 'admin'
-_DEBUG_pw = 'password'
+_DEBUG_pw = 'Pass@word1!'
 _DEBUG_s = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
 _DEBUG_fid = '128'
-_DEBUG_p = '*'  # Use s/p notation for directors
-_DEBUG_a = 'disable'
+_DEBUG_p = '0'  # Use s/p notation for directors
+_DEBUG_a = 'p_enable'
 _DEBUG_d = True  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_sup = False
 _DEBUG_log = '_logs'
@@ -468,7 +470,8 @@ def pseudo_main():
                 brcdapi_log.log('Successfully completed action: ' + action, echo=True)
 
     except BaseException as e:
-        brcdapi_log.exception('Programming error encountered. Exception is: ' + str(e), echo=True)
+        e_buf = str(e, errors='ignore') if isinstance(e, (bytes, str)) else str(type(e))
+        brcdapi_log.exception('Programming error encountered. Exception is: ' + e_buf, echo=True)
         ec = -1
 
     # Logout
