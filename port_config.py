@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2021, 2022 Jack Consoli.  All rights reserved.
+# Copyright 2021, 2022, 2023 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -20,102 +20,48 @@
 **Description**
 
     Initially, this began as a module with programming examples only. If that is all you are looking for, search on the
-    methods in the Examples section. I needed something to perform these functions on multiple ports and since I had
-    several other scripts with a shell interface all it took was some copy and paste with a few tweaks and I had a stand
-    alone module.
+    methods in the Examples section. As with many of these examples, I added a shell interface to use them for my own
+    scripts to configure ports.
 
     To set break points for experimentation purposes, search for _DEBUG. This allows you to simulate command line input.
 
 **Examples**
 
-    Search for _action_tbl_d to see how the actions are executed.
+    In the table below, the "Action" column is used with the -a option when running this script from a shell. If
+    interested in how that aspect of this script works, search for _action_tbl_d. If all you are looking for are code
+    examples, just search for the methods.
 
-    |-------------------+-----------+-----------------------------------------------------------+
-    | Method            | Action    | Description                                               |
-    |===================+===========+===========================================================+
-    | _action_name      | name      | Assigns user friendly name to a port or list of ports.    |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_disable   | disable   | Disable a port or list of ports.                          |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_p_disable | p_disable | Persistently disable a port or list of ports.             |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_enable    | enable    | Enable a port or list of ports.                           |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_p_enable  | p_enable  | Persistently enable a port or list of ports.              |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_decom     | decom     | Decommission a port or list of ports                      |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_clear     | clear     | Clears statistics for a port or list of ports.            |
-    |-------------------+-----------+-----------------------------------------------------------+
-    | _action_default   | default   | Set a port or list of ports to the default configuration. |
-    |-------------------+-----------+-----------------------------------------------------------+
-
-**Advanced Scripting Techniques Used Herein**
-
-    There are some features of Python used herein that are either not commonly used by script writers or not supported
-    in other scripting languages.
-
-    *List Comprehension*
-
-        A list comprehension is a short hand way of writing a loop that builds a list (array). For example, to extract
-        all the numbers from a list of strings and convert them to a list of integers:
-
-            input_str_list = ['5', 'a', '234', 'dog']
-
-        The long way:
-
-            number_list = list()
-            for buf in input_str_list:
-                if buf.isnumeric():
-                    number_list.append(int(buf))
-
-        The short way (using list comprehension syntax):
-
-            number_list = [int(buf) for buf in input_str_list if buf.isnumeric()]
-
-        In either case, number_list = [5, 234]
-
-    *Table Driven Software*
-
-        This technique is used when using this module as a stand alone utility. See _action_tbl_d. If you are just
-        looking at the examples there is no need for you to understand this.
-
-        Calling a method (subroutine) from a table is a very common practice in C++ programming. Although Python and
-        other scripting languages support doing this, its not common. It is especially useful in Python because Python
-        does not have a case statement so this approach saves a lot of if, elif, ... Keep in mind that when you do this,
-        the same code is calling different methods so each method must have the same input parameters.
-
-        For example, these methods convert a number, float or int, with a K, M, or G multiplier to their full value:
-
-        def _action_k(value):
-            return str(value * 1000)
-
-        def _action_m(value):
-            return str(value * 1000000)
-
-        def _action_g(value):
-            return str(value * 1000000000)
-
-        Note that in the table below the method name is not followed by parenthesis. A method name followed by
-        parenthesis tells Python to call the method and load the return value into the table. That's not what we want.
-        We want to load the pointer to the method in the table.
-
-        Set up the table:
-
-            _action_table = dict(K=_action_k, M=_action_m, G=_action_g)
-
-        This code:
-
-            value = 12
-            for buf in ['K', 'M', 'G']:
-                str_value = _action_table[buf](value)
-                print(str(value) + buf + ' = ' + str_value
-
-        Outputs:
-
-            12K = 12000
-            12M = 12000000
-            12G = 12000000000
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | Method                | Action    | Description                                               |
+    |=======================+===========+===========================================================+
+    | _action_name          | name      | Assigns user friendly name to a port or list of ports.    |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_disable       | disable   | Disable a port or list of ports.                          |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_p_disable     | p_disable | Persistently disable a port or list of ports.             |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_enable        | enable    | Enable a port or list of ports.                           |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_p_enable      | p_enable  | Persistently enable a port or list of ports.              |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_decom         | decom     | Decommission a port or list of ports                      |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_clear         | clear     | Clears statistics for a port or list of ports.            |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_default       | default   | Set a port or list of ports to the default configuration. |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_enable_eport  | enable_e  | Enables E-Port mode on a port or list of ports.           |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_disable_eport | disable_e | Disables E-Port mode on a port or list of ports.          |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_enable_nport  | enable_n  | Enables N-Port mode on a port or list of ports.           |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_disable_nport | disable_n | Disables N-Port mode on a port or list of ports.          |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_reserve       | reserve   | Reserves POD license for ports.                           |
+    |-----------------------+-----------+-----------------------------------------------------------+
+    | _action_release       | release   | Releases POD license for ports.                           |
+    |-----------------------+-----------+-----------------------------------------------------------+
 
 Version Control::
 
@@ -146,15 +92,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 3.0.9     | 24 Oct 2022   | Improved error messaging                                                          |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 3.1.0     | 01 Jan 2023   | Added _action_enable_eport(), _action_disable_eport(), _action_enable_nport(),    |
+    |           |               | _action_disable_nport(), _action_reserve(), and _action_release()                 |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021, 2022 Jack Consoli'
-__date__ = '24 Oct 2022'
+__copyright__ = 'Copyright 2021, 2022, 2023 Jack Consoli'
+__date__ = '01 Jan 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.9'
+__version__ = '3.1.0'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -167,13 +116,13 @@ import brcdapi.file as brcdapi_file
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
 _DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_ip = '10.155.2.69'
+_DEBUG_ip = 'xx.xxx.xx.xx'
 _DEBUG_id = 'admin'
-_DEBUG_pw = 'Pass@word1!'
+_DEBUG_pw = 'password'
 _DEBUG_s = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
 _DEBUG_fid = '128'
-_DEBUG_p = '0'  # Use s/p notation for directors
-_DEBUG_a = 'p_enable'
+_DEBUG_p = '0/0-3'  # Use s/p notation for directors
+_DEBUG_a = 'disable'
 _DEBUG_d = True  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_sup = False
 _DEBUG_log = '_logs'
@@ -185,8 +134,6 @@ _DEBUG_nl = False
 #       Action methods for _action_tbl_d
 #
 ####################################################################
-
-
 def _action_name(session, fid, in_port_l):
     """Assigns user friendly name to a port or list of ports.
 
@@ -272,6 +219,58 @@ def _action_default(session, fid, in_port_l):
     return brcdapi_port.default_port_config(session, fid, [p.split(':')[0] for p in in_port_l])
 
 
+def _action_enable_eport(session, fid, in_port_l):
+    """Enables ports for use as an E-Port. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.e_port(session,
+                                     fid,
+                                     [p.split(':')[0] for p in in_port_l],  # port list
+                                     mode=True)
+
+
+def _action_disable_eport(session, fid, in_port_l):
+    """Disables ports for use as an E-Port. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.e_port(session,
+                               fid,
+                               [p.split(':')[0] for p in in_port_l],  # port list
+                               mode=False)
+
+
+def _action_enable_nport(session, fid, in_port_l):
+    """Enables ports for use as an E-Port. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.n_port(session,
+                               fid,
+                               [p.split(':')[0] for p in in_port_l],  # port list
+                               mode=True)
+
+
+def _action_disable_nport(session, fid, in_port_l):
+    """Disables ports for use as an E-Port. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.n_port(session,
+                               fid,
+                               [p.split(':')[0] for p in in_port_l],  # port list
+                               mode=False)
+
+
+def _action_reserve(session, fid, in_port_l):
+    """Reserves POD license for ports. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.reserve_pod(session,
+                                    fid,
+                                    [p.split(':')[0] for p in in_port_l])  # port list
+
+
+def _action_release(session, fid, in_port_l):
+    """Releases POD license for ports. See _action_name() parameters and return value definitions"""
+    # Since users may be using the port list for names, 's/p:name', below strips out the name
+    return brcdapi_port.release_pod(session,
+                                    fid,
+                                    [p.split(':')[0] for p in in_port_l])  # port list
+
+
 """This table is only used when using this module as a stand alone utility. The key in _action_tbl_d is the action, -a
 from the command line. The value is a dictionary as follows:
 +-------+-----------------------------------------------------------------------------------------------------------+
@@ -292,10 +291,16 @@ _action_tbl_d = dict(
     decom=dict(a=_action_decom, h='Decommission ports (E-Ports only)'),
     clear=dict(a=_action_clear, h='Clear port statistics'),
     default=dict(a=_action_default, h='Disable and set all ports to the default port configuration'),
+    eport_enable=dict(a=_action_enable_eport, h='Enable ports for use as an E-Port'),
+    eport_disable=dict(a=_action_disable_eport, h='Disable ports for use as an E-Port'),
+    nport_enable=dict(a=_action_enable_nport, h='Enable ports for use as an N-Port'),
+    nport_disable=dict(a=_action_disable_nport, h='Disable ports for use as an N-Port'),
+    reserve=dict(a=_action_reserve, h='Reserves POD license for ports.'),
+    release=dict(a=_action_release, h='Releases POD license for ports.'),
 )
 _help_pad_len = 0
 for _key in _action_tbl_d.keys():
-    _help_pad_len = max(_help_pad_len, len(_key)+1)
+    _help_pad_len = max(_help_pad_len, len(_key)+2)
 
 
 def _get_input():
@@ -329,15 +334,15 @@ def _get_input():
         buf = 'Initially developed as programming examples. A shell interface was added to be run as a stand-alone '\
               'utility to modify port configurations.'
         parser = argparse.ArgumentParser(description=buf)
-        parser.add_argument('-ip', help='(Required) IP address', required=True)
-        parser.add_argument('-id', help='(Required) User ID', required=True)
-        parser.add_argument('-pw', help='(Required) Password', required=True)
+        parser.add_argument('-ip', help='(Required) IP address', required=False)
+        parser.add_argument('-id', help='(Required) User ID', required=False)
+        parser.add_argument('-pw', help='(Required) Password', required=False)
         parser.add_argument('-s', help="(Optional) Default is HTTP. Use -s self for HTTPS mode.", required=False)
-        parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=True)
-        buf = '(Required) "*" for all ports in FID. Not valid if the action is "name". Any entry with "." in it is' \
-              'assumed to be a file to read the port list from. May also be a CSV list of ports in s/p notation. '\
-              'For action "name", use s/p:port_name.'
-        parser.add_argument('-p', help=buf, required=True)
+        parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=False)
+        buf = '(Required) CSV list of ports or range of ports in s/p notation. Use "*" for all ports in FID. Any '\
+              'entry with "." in it is assumed to be a file to read the port list from. For action "name", use '\
+              's/p:port_name. "*" or a range of ports is not supported if the action, -a, is "name".'
+        parser.add_argument('-p', help=buf, required=False)
         buf = '(Required) CSV list of actions to take on the port list, -p. For a list of actions, enter "help".'
         parser.add_argument('-a', help=buf, required=True)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
@@ -362,17 +367,9 @@ def _get_input():
     if not args_nl:
         brcdapi_log.open_log(args_log)
 
-    # Validate the FID
-    fid = int(args_fid) if args_fid.isnumeric() and '.' not in args_fid else 0
-    fid_buf = args_fid
-    if fid < 1 or fid > 128:
-        fid_buf += ' INVALID: Fabric ID must be an integer in the range 1-128'
-        ec = -1
-
     # Validate the actions:
     action_buf = args_a
     action_l = args_a.split(',')
-    error_l = list()
     for action in action_l:
         if action not in _action_tbl_d:
             if action == 'help':
@@ -381,13 +378,27 @@ def _get_input():
                     ml.append(gen_util.pad_string(str(buf), _help_pad_len, ' ', append=True) + d['h'])
                 ml.append('')
                 brcdapi_log.log(ml, echo=True)
-                ec = -1
-                break
+                return -1, args_ip, args_id, args_pw, args_s, args_fid, args_p, action_l
             else:
-                error_l.append(action)
+                ec = -1
+                action_buf += ' INVALID. Re-run with "-a help" for a list of valid actions.'
 
-    if len(error_l) > 0:
-        action_buf += ' INVALID: ' + ', '.join(error_l)
+    # Validate the FID
+    fid = int(args_fid) if isinstance(args_fid, str) and args_fid.isnumeric() and '.' not in args_fid else 0
+    fid_buf = str(args_fid)
+    if fid < 1 or fid > 128:
+        fid_buf += ' INVALID: Fabric ID must be an integer in the range 1-128'
+        ec = -1
+
+    # Validate that the remaining options were defined
+    if args_ip is None:
+        args_ip = 'Missing. For additional help, re-run with -h.'
+        ec = -1
+    if args_id is None:
+        args_id = 'Missing. For additional help, re-run with -h.'
+        ec = -1
+    if args_p is None:
+        args_p = 'Missing. For additional help, re-run with -h.'
         ec = -1
 
     # User feedback
@@ -395,11 +406,14 @@ def _get_input():
           'IP address, -ip: ' + brcdapi_util.mask_ip_addr(args_ip),
           'ID, -id:         ' + args_id,
           'Secure, -s:      ' + str(args_s),
-          'Fabric ID, -fid: ' + fid_buf,
+          'Fabric ID, -fid: ' + str(fid_buf),
           'Ports, -p:       ' + args_p,
           'Actions, -a:     ' + action_buf]
     if _DEBUG:
         ml.insert(0, 'WARNING!!! Debug is enabled')
+    if args_pw is None:
+        ml.append('Missing password, -pw. For additional help, re-run with -h.')
+        ec = -1
     brcdapi_log.log(ml, echo=True)
 
     return ec, args_ip, args_id, args_pw, args_s, fid, args_p, action_l
@@ -452,8 +466,8 @@ def pseudo_main():
                 brcdapi_log.log(['', 'Folder in ' + args_p + ' does not exist.', ''], echo=True)
                 ec = -1
 
-        else:  # Just take the user input as a CSV list of ports
-            port_l = args_p.split(',')
+        else:  # Just take the user input as a CSV list of ports or range of ports
+            port_l = brcdapi_port.port_range_to_list(args_p)
 
         # Perform the actions
         for action in action_l:
