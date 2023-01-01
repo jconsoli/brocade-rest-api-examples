@@ -3,6 +3,11 @@
 
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
 
+**Updated 01 Jan 2023**
+
+* Added ability to delete all or a range of switches in switch_delete.py
+* Added enable/disable options and reserve/release PODs to port_config.py
+
 **Updated 31 Dec 2021**
 
 * Several comments and user messaging improved
