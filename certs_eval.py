@@ -91,7 +91,7 @@
 
 **Requirements**
 
-    * FOS 8.2.1c or higher
+    * FOS 9.1.0 or higher
     * Python 3.3 or higher
 
 Version Control::
@@ -101,16 +101,18 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 28 Apr 2022   | Initial launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 26 Mar 2022   | Fixed FOS requirement in description.                                             |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2022 Jack Consoli'
-__date__ = '28 Apr 2022'
+__date__ = '26 Mar 2022'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import datetime
 import argparse
@@ -213,7 +215,7 @@ def _extract_certificate(file):
 
     Depending on how well controlled your environment is, this may not be needed.  What needs to be sent to the switch
     is just the certificate or CSR portion but the CA administrator may have given you a file containing verbose output.
-    If that happened, the plain text information must be stripped out. The only thing FOS wants to see is the bas64
+    If that happened, the plain text information must be stripped out. The only thing FOS wants to see is the base64
     encoded certificate + the beginning and ending demarcations. Specifically, this is everything between '-----BEGIN'
     and '-----END xxx-----' inclusive of '-----BEGIN', the trailing '-----' in '-----END xxx-----'.
 
