@@ -36,17 +36,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.2.6     | 21 Jan 2023   | Latest updates.                                                                   |
+    | 3.2.7     | 29 Mar 2023   | Latest updates.                                                                   |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021, 2022, 2023 Jack Consoli'
-__date__ = '21 Jan 2023'
+__date__ = '29 Mar 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.2.5'
+__version__ = '3.2.7'
 
 import sys
 import os
@@ -86,7 +86,7 @@ _imports = (
     {'l': 'datetime', 'd': 'Required for brcdapi.log'},
     {'l': 'pprint', 'd': 'Used for error reporting.'},
     {'l': 're', 'd': 'Used in brcddb.util.search for ReGex searching'},
-    {'l': 'cryptography', 'd': 'Used in examples that update security certificates'},
+    {'l': 'cryptography', 'd': 'Used in API examples certs_eval.py and certs_get.py'},
     {'l': 'urllib3', 'd': 'Used in examples that update security certificates'},
     {'d': ''},
     {'d': 'Open source python libraries. Typically not included in standard Python installs.'},
@@ -98,16 +98,15 @@ _imports = (
     {'d': ''},
     {'d': 'FOS API driver libraries from github/jconsoli - brcdapi.'},
     {'d': ''},
-    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '1.0.6'},
+    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '1.0.7'},
     {'l': 'brcdapi.brcdapi_rest', 'd': 'FOS RESTConf API driver.', 'r': '3.1.1'},
-    {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.4'},
+    {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.5'},
     {'l': 'brcdapi.excel_fonts', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.2'},
-    {'l': 'brcdapi.fos_cli', 'd': 'Required by switch_config.py applications.', 'r': '3.0.3'},
     {'l': 'brcdapi.file', 'd': 'Required by modules that perform file I/O.', 'r': '1.0.3'},
     {'l': 'brcdapi.gen_util', 'd': 'Required by most scripts.', 'r': '1.0.8'},
     {'l': 'brcdapi.log', 'd': 'Required by all scripts.', 'r': '3.0.7'},
     {'l': 'brcdapi.port', 'd': 'Required for reading and configuring ports.', 'r': '3.0.8'},
-    {'l': 'brcdapi.switch', 'd': 'Required for reading and configuring switches.', 'r': '3.0.8'},
+    {'l': 'brcdapi.switch', 'd': 'Required for reading and configuring switches.', 'r': '3.0.9'},
     {'l': 'brcdapi.util', 'd': 'Utilities supporting the FOS RESTConf API driver.', 'r': '3.1.0'},
     {'l': 'brcdapi.zone', 'd': 'Required by scripts performing zoning operations.', 'r': '3.0.6'},
     {'d': ''},
@@ -120,7 +119,7 @@ _imports = (
     {'l': 'brcddb.brcddb_bp', 'd': 'Required for the report.py application', 'r': '3.1.1'},
     {'l': 'brcddb.brcddb_chassis', 'd': 'Required for most brcddb libraries', 'r': '3.0.8'},
     {'l': 'brcddb.brcddb_common', 'd': 'Required for most applications and brcddb libraries', 'r': '3.0.8'},
-    {'l': 'brcddb.brcddb_fabric', 'd': 'Required for most brcddb libraries', 'r': '3.2.1'},
+    {'l': 'brcddb.brcddb_fabric', 'd': 'Required for most brcddb libraries', 'r': '3.2.2'},
     {'l': 'brcddb.brcddb_login', 'd': 'Required for most applications', 'r': '3.0.7'},
     {'l': 'brcddb.brcddb_port', 'd': 'Required for most brcddb libraries', 'r': '3.1.0'},
     {'l': 'brcddb.brcddb_project', 'd': 'Required for most brcddb libraries', 'r': '3.1.4'},
