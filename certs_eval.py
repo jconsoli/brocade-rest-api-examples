@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2022 Jack Consoli.  All rights reserved.
+# Copyright 2022, 2023 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -103,16 +103,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | 1.0.1     | 26 Mar 2022   | Fixed FOS requirement in description.                                             |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.2     | 09 May 2023   | used brcdapi_rest.operations_request() in decommission_port()                     |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2022 Jack Consoli'
-__date__ = '26 Mar 2022'
+__copyright__ = 'Copyright 2022, 2023 Jack Consoli'
+__date__ = '09 May 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 import datetime
 import argparse
@@ -585,7 +587,7 @@ def _add_cert(session, entity, cert_type, cert_file):
             'certificate-hexdump': hexdump
         }
     }
-    obj = brcdapi_rest.send_request(session, 'operations/security-certificate', 'POST', content)
+    obj = brcdapi_rest.operations_request(session, 'operations/security-certificate', 'POST', content)
     if fos_auth.is_error(obj):
         brcdapi_log.log(['  Error adding ' + entity + ', ' + cert_type, '    '+fos_auth.formatted_error_msg(obj)], True)
         return False
