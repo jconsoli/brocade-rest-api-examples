@@ -15,13 +15,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-:mod:`config_upload_download.py` - configupload/download exmples.
+:mod:`config_upload_download.py` - configupload/download examples.
 
 **Description**
 
-    Upload and download config via the API
+    Examples on how to upload and download configuration data in-band using the operations/configupload and
+    operations/configdownload URI branches in the FOS API. It is equivalent to the FOS configupload and configdownload
+    commands.
+
+    Primary methods of interest are:
+
+    * _action_upload()
+    * _action_download()
 
     To set break points for experimentation purposes, search for _DEBUG. This allows you to simulate command line input.
+
+**WARNINGS**
+
+    * These are programming examples on how to use the interface and set the request options only. It is up to the
+      programmer using these examples to determine if the options are valid or make sense.
+    * Certain test scenarios always returned "in-progress" status with 0% complete. FOS 9.2.0 is recommended.
+    * The "operations/show-status/message-id/xxxx" returns status for the show-status request, not the original request.
+      Status and error messages associated with original request are embedded in human readable format in the "message"
+      portion of the response. This means an operations/configupload or operations/configdownload request can fail with
+      status=200. Human intervention is required to determine if the config upload/download completed successfully.
+    * Testing was limited to the mechanics of the protocol interface only. Certain observations made during that testing
+      is reported in these comments but should not be construed as more extensive testing.
 
 Version Control::
 
@@ -30,15 +49,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 09 May 2023   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 11 May 2023   | Documentation updates only                                                        |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2023 Jack Consoli'
-__date__ = '09 May 2023'
+__date__ = '11 May 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import argparse
 import pprint
