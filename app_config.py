@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2022 Jack Consoli.  All rights reserved.
+# Copyright 2022, 2023 Jack Consoli.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -15,12 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-:mod:`chassis_config.py` - Examples on how to modify chassis configuration parameters.
+:mod:`app_config.py` - Examples on how to modify chassis configuration parameters.
 
 **Description**
 
     Illustrates how to read and change parameters available in the
-    "running/brocade-chassis/management-interface-configuration".
+    "running/brocade-chassis/management-interface-configuration". Specifically:
+
+    * Enable/disable the Rest interface
+    * Enable/disable HTTPS
+    * Enable/disable keep alive
+
 
 Version Control::
 
@@ -29,15 +34,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 1.0.0     | 28 Apr 2022   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
+    | 1.0.1     | 27 May 2023   | Fixed help messages                                                               |
+    +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2022 Jack Consoli'
-__date__ = 'xx xxx 2022'
+__date__ = '27 May 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import argparse
 import pprint
@@ -80,7 +87,7 @@ def _get_input():
     :return content: Content for "running/brocade-chassis/management-interface-configuration".
     :rtype content: dict
     """
-    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_r, _DEBUG_rest_en, _DEBUG_rest_dis
+    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_rest_en, _DEBUG_rest_dis
     global _DEBUG_https_en, _DEBUG_https_dis, _DEBUG_max_rest, _DEBUG_ka_en, _DEBUG_ka_en
     global _DEBUG_d, _DEBUG_log, _DEBUG_nl
 
@@ -115,7 +122,7 @@ def _get_input():
                             required=False)
         parser.add_argument('-ka_en', help='(Optional) No parameters. Enable keep-alive', action='store_true',
                             required=False)
-        parser.add_argument('-ka_dis', help='(Optional) No parameters. Enable keep-alive', action='store_true',
+        parser.add_argument('-ka_dis', help='(Optional) No parameters. Disable keep-alive', action='store_true',
                             required=False)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
@@ -153,7 +160,7 @@ def _get_input():
     ml.append('Enable Rest, -rest_en:        ' + str(args_rest_en))
     ml.append('Disable Rest, -rest_dis:      ' + str(args_rest_dis))
     ml.append('Enable HTTPS, -https_en:      ' + str(args_https_en))
-    ml.append('Disable HTTPS, -https_en:     ' + str(args_https_dis))
+    ml.append('Disable HTTPS, -https_dis:    ' + str(args_https_dis))
     ml.append('Enable keep-alive, -ka_en:    ' + str(args_ka_en))
     ml.append('Disable keep-alive, -ka_dis:  ' + str(args_ka_dis))
     ml.append('Max Rest sessions, -max_rest: ' + str(args_max_rest))
