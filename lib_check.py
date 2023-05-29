@@ -36,17 +36,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.3.0     | 27 May 2023   | Latest updates.                                                                   |
+    | 3.3.1     | 29 May 2023   | Latest updates.                                                                   |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021, 2022, 2023 Jack Consoli'
-__date__ = '27 May 2023'
+__date__ = '29 May 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.3.0'
+__version__ = '3.3.1'
 
 import sys
 import os
@@ -152,7 +152,7 @@ _imports = (
     {'l': 'brcddb.report.port', 'd': 'Required for generating Excel reports', 'r': '3.1.2'},
     {'l': 'brcddb.report.switch', 'd': 'Required for generating Excel reports', 'r': '3.0.8'},
     {'l': 'brcddb.report.utils', 'd': 'Required for generating Excel reports', 'r': '3.1.6'},
-    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '3.1.7'},
+    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '3.1.8'},
     {'l': 'brcddb.app_data.alert_tables', 'd': 'Alert format tables. Required for best practice analysis.',
      'r': '3.1.4'},
     {'l': 'brcddb.app_data.report_tables', 'd': 'Required for controlling the formats when generating Excel reports',
@@ -349,7 +349,7 @@ def pseudo_main():
     if len(summary_missing) > 0:
         print('\n'.join(summary_missing))
     else:
-        print('Found all moduless')
+        print('Found all modules')
     print('\nSummary of recommended updates:')
     if len(summary_updates) > 0:
         print('\n'.join(summary_updates))
