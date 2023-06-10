@@ -36,17 +36,17 @@ Version Control::
     +===========+===============+===================================================================================+
     | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.3.2     | 05 Jun 2023   | Latest updates.                                                                   |
+    | 3.3.3     | 10 Jun 2023   | Latest updates.                                                                   |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2020, 2021, 2022, 2023 Jack Consoli'
-__date__ = '05 Jun 2023'
+__date__ = '10 Jun 2023'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack.consoli@broadcom.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.3.2'
+__version__ = '3.3.3'
 
 import sys
 import os
@@ -151,9 +151,9 @@ _imports = (
     {'l': 'brcddb.report.port', 'd': 'Required for generating Excel reports', 'r': '3.1.3'},
     {'l': 'brcddb.report.switch', 'd': 'Required for generating Excel reports', 'r': '3.0.9'},
     {'l': 'brcddb.report.utils', 'd': 'Required for generating Excel reports', 'r': '3.1.7'},
-    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '3.1.9'},
+    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '3.2.0'},
     {'l': 'brcddb.app_data.alert_tables', 'd': 'Alert format tables. Required for best practice analysis.',
-     'r': '3.1.4'},
+     'r': '3.1.5'},
     {'l': 'brcddb.app_data.report_tables', 'd': 'Required for controlling the formats when generating Excel reports',
      'r': '3.1.6'},
     {'d': ''},
