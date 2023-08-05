@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2021 Jack Consoli.  All rights reserved.
+# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -32,17 +32,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | Version   | Last Edit     | Description                                                                       |
     +===========+===============+===================================================================================+
-    | 1.0.0     | xx xxx 2022   | Initial Launch                                                                    |
+    | 4.0.0     | xx xxx 2023   | Initial launch                                                                    |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
+
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2021 Jack Consoli'
-__date__ = 'xx xxx 2022'
+__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
+__date__ = 'xx Aug 2023'
 __license__ = 'Apache License, Version 2.0'
-__email__ = 'jack.consoli@broadcom.com'
+__email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Development'
-__version__ = '1.0.0'
+__version__ = '4.0.0'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest

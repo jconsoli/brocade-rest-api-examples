@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2020, 2021 Jack Consoli.  All rights reserved.
+# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -22,26 +22,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | Version   | Last Edit     | Description                                                                       |
     +===========+===============+===================================================================================+
-    | 3.0.0     | 01 Nov 2020   | Started with 3.x for consistency with other modules in this library.              |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.0.1     | 09 Jan 2021   | Open log file.                                                                    |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.0.2     | 13 Feb 2021   | Added # -*- coding: utf-8 -*-                                                     |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.0.3     | 14 Nov 2021   | Deprecated pyfos_auth                                                             |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.0.4     | 31 Dec 2021   | Updated comments only. No functional changes.                                     |
+    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
 
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2020, 2021 Jack Consoli'
-__date__ = '31 Dec 2021'
+__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
+__date__ = '04 August 2023'
 __license__ = 'Apache License, Version 2.0'
-__email__ = 'jack.consoli@broadcom.com'
+__email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.0.4'
+__version__ = '4.0.0'
 
 import argparse
 import brcdapi.log as brcdapi_log
