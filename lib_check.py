@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2020, 2021, 2022, 2023 Jack Consoli.  All rights reserved.
+# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
 #
 # NOT BROADCOM SUPPORTED
 #
@@ -34,19 +34,18 @@ Version Control::
     +-----------+---------------+-----------------------------------------------------------------------------------+
     | Version   | Last Edit     | Description                                                                       |
     +===========+===============+===================================================================================+
-    | 3.0.0     | 19 Jul 2020   | Initial Launch                                                                    |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | 3.3.6     | 06 Jul 2023   | Latest updates.                                                                   |
+    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
     +-----------+---------------+-----------------------------------------------------------------------------------+
 """
+
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2020, 2021, 2022, 2023 Jack Consoli'
-__date__ = '06 Jul 2023'
+__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
+__date__ = '04 August 2023'
 __license__ = 'Apache License, Version 2.0'
-__email__ = 'jack.consoli@broadcom.com'
+__email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '3.3.6'
+__version__ = '4.0.0'
 
 import sys
 import os
@@ -97,69 +96,69 @@ _imports = (
     {'d': ''},
     {'d': 'FOS API driver libraries from github/jconsoli - brcdapi.'},
     {'d': ''},
-    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '1.0.8'},
-    {'l': 'brcdapi.brcdapi_rest', 'd': 'FOS RESTConf API driver.', 'r': '3.1.3'},
-    {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.6'},
-    {'l': 'brcdapi.excel_fonts', 'd': 'Required by modules that read or write Excel workbooks', 'r': '1.0.2'},
-    {'l': 'brcdapi.file', 'd': 'Required by modules that perform file I/O.', 'r': '1.0.4'},
-    {'l': 'brcdapi.gen_util', 'd': 'Required by most scripts.', 'r': '1.1.0'},
-    {'l': 'brcdapi.log', 'd': 'Required by all scripts.', 'r': '3.0.7'},
-    {'l': 'brcdapi.port', 'd': 'Required for reading and configuring ports.', 'r': '3.1.0'},
-    {'l': 'brcdapi.switch', 'd': 'Required for reading and configuring switches.', 'r': '3.1.1'},
-    {'l': 'brcdapi.util', 'd': 'Utilities supporting the FOS RESTConf API driver.', 'r': '3.1.4'},
-    {'l': 'brcdapi.zone', 'd': 'Required by scripts performing zoning operations.', 'r': '3.0.8'},
+    {'l': 'brcdapi.fos_auth', 'd': 'Required by brcdapi.brcdapi_rest.', 'r': '4.0.0'},
+    {'l': 'brcdapi.brcdapi_rest', 'd': 'FOS RESTConf API driver.', 'r': '4.0.0'},
+    {'l': 'brcdapi.excel_util', 'd': 'Required by modules that read or write Excel workbooks', 'r': '4.0.0'},
+    {'l': 'brcdapi.excel_fonts', 'd': 'Required by modules that read or write Excel workbooks', 'r': '4.0.0'},
+    {'l': 'brcdapi.file', 'd': 'Required by modules that perform file I/O.', 'r': '4.0.0'},
+    {'l': 'brcdapi.gen_util', 'd': 'Required by most scripts.', 'r': '4.0.0'},
+    {'l': 'brcdapi.log', 'd': 'Required by all scripts.', 'r': '4.0.0'},
+    {'l': 'brcdapi.port', 'd': 'Required for reading and configuring ports.', 'r': '4.0.0'},
+    {'l': 'brcdapi.switch', 'd': 'Required for reading and configuring switches.', 'r': '4.0.0'},
+    {'l': 'brcdapi.util', 'd': 'Utilities supporting the FOS RESTConf API driver.', 'r': '4.0.0'},
+    {'l': 'brcdapi.zone', 'd': 'Required by scripts performing zoning operations.', 'r': '4.0.0'},
     {'d': ''},
     {'d': 'FOS API database libraries from github/jconsoli - brcddb'},
     {'d': ''},
-    {'l': 'brcddb.api.interface', 'd': 'Required for all access to the API', 'r': '3.1.1'},
-    {'l': 'brcddb.api.zone', 'd': 'Required for zoning applications', 'r': '3.0.7'},
-    {'l': 'brcddb.apps.report', 'd': 'Required for the report.py application', 'r': '3.1.8'},
-    {'l': 'brcddb.apps.zone', 'd': 'Required for the cli_zone.py application', 'r': '3.0.6'},
-    {'l': 'brcddb.brcddb_bp', 'd': 'Required for the report.py application', 'r': '3.1.4'},
-    {'l': 'brcddb.brcddb_chassis', 'd': 'Required for most brcddb libraries', 'r': '3.1.1'},
-    {'l': 'brcddb.brcddb_common', 'd': 'Required for most applications and brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.brcddb_fabric', 'd': 'Required for most brcddb libraries', 'r': '3.2.4'},
-    {'l': 'brcddb.brcddb_login', 'd': 'Required for most applications', 'r': '3.0.9'},
-    {'l': 'brcddb.brcddb_port', 'd': 'Required for most brcddb libraries', 'r': '3.1.1'},
-    {'l': 'brcddb.brcddb_project', 'd': 'Required for most brcddb libraries', 'r': '3.1.5'},
-    {'l': 'brcddb.brcddb_switch', 'd': 'Required for most brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.brcddb_zone', 'd': 'Required for most brcddb libraries', 'r': '3.0.8'},
-    {'l': 'brcddb.classes.alert', 'd': 'Required for all brcddb libraries', 'r': '3.0.5'},
-    {'l': 'brcddb.classes.chassis', 'd': 'Required for all brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.classes.fabric', 'd': 'Required for all brcddb libraries', 'r': '3.1.4'},
-    {'l': 'brcddb.classes.iocp', 'd': 'Required for all brcddb libraries', 'r': '3.0.9'},
-    {'l': 'brcddb.classes.login', 'd': 'Required for all brcddb libraries', 'r': '3.0.9'},
-    {'l': 'brcddb.classes.port', 'd': 'Required for all brcddb libraries', 'r': '3.1.2'},
-    {'l': 'brcddb.classes.project', 'd': 'Required for all brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.classes.switch', 'd': 'Required for all brcddb libraries', 'r': '3.1.2'},
-    {'l': 'brcddb.classes.util', 'd': 'Required for all brcddb libraries', 'r': '3.1.1'},
-    {'l': 'brcddb.classes.zone', 'd': 'Required for all brcddb libraries', 'r': '3.1.3'},
-    {'l': 'brcddb.util.copy', 'd': 'Required for most brcddb libraries', 'r': '3.0.7'},
-    {'l': 'brcddb.util.compare', 'd': 'Required for most brcddb libraries', 'r': '3.1.2'},
-    {'l': 'brcddb.util.iocp', 'd': 'Required for most brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.util.maps', 'd': 'Required for most brcddb libraries', 'r': '3.0.7'},
-    {'l': 'brcddb.util.obj_convert', 'd': 'Required for search.py application', 'r': '3.0.6'},
-    {'l': 'brcddb.util.parse_cli', 'd': 'Required for most brcddb libraries', 'r': '1.0.9'},
-    {'l': 'brcddb.util.search', 'd': 'Required for most brcddb libraries', 'r': '3.1.0'},
-    {'l': 'brcddb.util.util', 'd': 'Required for most brcddb libraries', 'r': '3.2.0'},
-    {'l': 'brcddb.report.bp', 'd': 'Required for generating Excel reports', 'r': '3.0.7'},
-    {'l': 'brcddb.report.chassis', 'd': 'Required for generating Excel reports', 'r': '3.0.9'},
-    {'l': 'brcddb.report.fabric', 'd': 'Required for generating Excel reports', 'r': '3.1.1'},
-    {'l': 'brcddb.report.graph', 'd': 'Required for generating Excel reports', 'r': '3.0.3'},
-    {'l': 'brcddb.report.iocp', 'd': 'Required for generating Excel reports', 'r': '3.0.8'},
-    {'l': 'brcddb.report.login', 'd': 'Required for generating Excel reports', 'r': '3.1.2'},
-    {'l': 'brcddb.report.port', 'd': 'Required for generating Excel reports', 'r': '3.1.3'},
-    {'l': 'brcddb.report.switch', 'd': 'Required for generating Excel reports', 'r': '3.0.9'},
-    {'l': 'brcddb.report.utils', 'd': 'Required for generating Excel reports', 'r': '3.1.7'},
-    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '3.2.2'},
+    {'l': 'brcddb.api.interface', 'd': 'Required for all access to the API', 'r': '4.0.0'},
+    {'l': 'brcddb.api.zone', 'd': 'Required for zoning applications', 'r': '4.0.0'},
+    {'l': 'brcddb.apps.report', 'd': 'Required for the report.py application', 'r': '4.0.0'},
+    {'l': 'brcddb.apps.zone', 'd': 'Required for the cli_zone.py application', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_bp', 'd': 'Required for the report.py application', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_chassis', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_common', 'd': 'Required for most applications and brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_fabric', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_login', 'd': 'Required for most applications', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_port', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_project', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_switch', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.brcddb_zone', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.alert', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.chassis', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.fabric', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.iocp', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.login', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.port', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.project', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.switch', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.util', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.classes.zone', 'd': 'Required for all brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.copy', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.compare', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.iocp', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.maps', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.obj_convert', 'd': 'Required for search.py application', 'r': '4.0.0'},
+    {'l': 'brcddb.util.parse_cli', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.search', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.util.util', 'd': 'Required for most brcddb libraries', 'r': '4.0.0'},
+    {'l': 'brcddb.report.bp', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.chassis', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.fabric', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.graph', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.iocp', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.login', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.port', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.switch', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.utils', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
+    {'l': 'brcddb.report.zone', 'd': 'Required for generating Excel reports', 'r': '4.0.0'},
     {'l': 'brcddb.app_data.alert_tables', 'd': 'Alert format tables. Required for best practice analysis.',
-     'r': '3.1.5'},
+     'r': '4.0.0'},
     {'l': 'brcddb.app_data.report_tables', 'd': 'Required for controlling the formats when generating Excel reports',
-     'r': '3.1.6'},
+     'r': '4.0.0'},
     {'d': ''},
     {'d': 'FOS API driver libraries from github/jconsoli, brcdapi, required for SANnav scripts.'},
     {'d': ''},
-    {'l': 'brcdapi.sannav_auth', 'd': 'Required by all SANnav scripts', 'r': '1.0.0'},
+    {'l': 'brcdapi.sannav_auth', 'd': 'Required by all SANnav scripts', 'r': '4.0.0'},
 )
 
 
