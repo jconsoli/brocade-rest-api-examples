@@ -1,21 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
-:mod:`switch_delete.py` - Examples on how to delete a logical switch.
+Copyright 2023, 2024 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
 
 Scroll all the way to the bottom to find the entry point.
 
@@ -32,35 +29,38 @@ Scroll all the way to the bottom to find the entry point.
     Although GE ports can be deleted, at this time there isn't an example of how to tear down the circuits and tunnels.
     Tearing down the circuits and tunnels is required before the ports can be moved to another logical switch.
 
-    Switch delete notes (this is all checked and taken care of in brcdapi.switch.delete_switch():
+    Switch delete notes: this is all checked and taken care of in brcdapi.switch.delete_switch():
 
     * You cannot delete the default logical switch.
-    * All ports in the switch being deleted must be moved to another logical switch before deleting the swithc
+    * All ports in the switch being deleted must be moved to another logical switch before deleting the switch
     * Ports must be at there factory default configuration before they can be moved.
 
 **Example**
 
 To delete the logical switch whose FID is 20:
 
-py switch_delete.py -ip xx.x.xxx.10 -id admin -pw password -s self -echo -fid 20
+py switch_delete.py -ip xx.x.xxx.10 -id admin -pw password -s self -fid 20
 
-Version Control::
+**Version Control**
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+---------------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                           |
++===========+===============+=======================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                             |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Increased estimated port group time from 25 sec to 40 sec.                            |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.2     | 06 Dec 2024   | Fixed spelling mistake in message.                                                    |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024 Consoli Solutions, LLC'
+__date__ = '06 Dec 2024'
 __license__ = 'Apache License, Version 2.0'
-__email__ = 'jack_consoli@yahoo.com'
+__email__ = 'jack@consoli-solutions.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -71,17 +71,18 @@ import brcdapi.util as brcdapi_util
 import brcdapi.switch as brcdapi_switch
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
-_DEBUG = False   # When True, use _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_OUTF, and _DEBUG_d
-_DEBUG_ip = 'xx.xxx.xx.xx'
-_DEBUG_id = 'admin'
-_DEBUG_pw = 'password'
-_DEBUG_s = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
-_DEBUG_fid = '*'
-_DEBUG_echo = True  # When true, echoes details of ports being moved.
-_DEBUG_d = False  # When True, all content and responses are formatted and printed (pprint).
-_DEBUG_sup = False  # This is a global override to suppress all logging echo to STD_OUT
-_DEBUG_log = '_logs'
-_DEBUG_nl = False
+# _STAND_ALONE: True: Executes as a standalone module taking input from the command line. False: Does not automatically
+# execute. This is useful when importing this module into another module that calls psuedo_main().
+_STAND_ALONE = True  # See note above
+
+# Input parameter definitions
+_input_d = gen_util.parseargs_login_d.copy()
+_input_d.update(
+    fid=dict(h='Required. Virtual Fabric ID to delete. May be a range, a CSV list, or "*" for all non-default '
+               'switches.'),
+)
+_input_d.update(gen_util.parseargs_log_d.copy())
+_input_d.update(gen_util.parseargs_debug_d.copy())
 
 
 def _get_fid_list(session):
@@ -104,86 +105,23 @@ def _get_fid_list(session):
     return list()
 
 
-def _get_input():
-    """Parses the module load command line
-
-    :return ip: Switch IP address
-    :rtype ip: str
-    :return id: User ID
-    :rtype id: str
-    :return pw: User password
-    :rtype ip: str
-    :return sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self signed
-    :rtype sec: str, None
-    :return fids: FID(s) to delete
-    :rtype fids: str
-    :return vd: Verbose debug flag.
-    :rtype vd: bool
-    """
-    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_fid, _DEBUG_echo, _DEBUG_d, _DEBUG_log, _DEBUG_nl
-    global _DEBUG_sup
-
-    if _DEBUG:
-        args_ip, args_id, args_pw, args_s, args_fid, args_echo, args_d, args_sup, args_log, args_nl = \
-            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_fid, _DEBUG_echo, _DEBUG_d, _DEBUG_sup, _DEBUG_log, \
-            _DEBUG_nl
-    else:
-        parser = argparse.ArgumentParser(description='Delete a logical switch.')
-        parser.add_argument('-ip', help='(Required) IP address', required=True)
-        parser.add_argument('-id', help='(Required) User ID', required=True)
-        parser.add_argument('-pw', help='(Required) Password', required=True)
-        buf = '(Required) Virtual Fabric ID to delete. May be a range, a CSV list, or "*" for all non-default switches.'
-        parser.add_argument('-fid', help=buf, required=True)
-        parser.add_argument('-s', help="(Optional) Default is HTTP. CA or self for HTTPS mode.", required=False)
-        buf = '(Optional) Echoes activity detail to STD_OUT. Recommended because there are multiple operations that '\
-              'can be very time consuming.'
-        parser.add_argument('-echo', help=buf, action='store_true', required=False)
-        buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
-        buf = '(Optional) Suppress all library generated output to STD_IO except the exit code. Useful with batch ' \
-              'processing'
-        parser.add_argument('-sup', help=buf, action='store_true', required=False)
-        parser.add_argument('-d', help=buf, action='store_true', required=False)
-        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log '\
-              'file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
-        parser.add_argument('-log', help=buf, required=False, )
-        buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
-        parser.add_argument('-nl', help=buf, action='store_true', required=False)
-        args = parser.parse_args()
-
-        args_ip, args_id, args_pw, args_s, args_fid, args_echo, args_d, args_sup, args_log, args_nl = \
-            args.ip, args.id, args.pw, args.s, args.fid, args.echo, args.d, args.sup, args.log, args.nl
-
-    # Set up the logging options
-    if args_sup:
-        brcdapi_log.set_suppress_all()
-    if not args_nl:
-        brcdapi_log.open_log(args_log)
-    if args_d:
-        brcdapi_rest.verbose_debug = True
-
-    # User feedback
-    ml = ['switch_delete.py:    ' + __version__,
-          'IP, -ip:             ' + brcdapi_util.mask_ip_addr(args_ip, keep_last=True),
-          'FID, -fid:           ' + args_fid,
-          'Echo, -echo:         ' + str(args_echo),
-          'Debug, -d:           ' + str(args_d)]
-    if _DEBUG:
-        ml.insert(0, 'WARNING!!! Debug is enabled')
-    brcdapi_log.log(ml, echo=True)
-
-    return args_ip, args_id, args_pw, args_s, args_fid, args_echo
-
-
-def pseudo_main():
+def pseudo_main(ip, user_id, pw, sec, fid_l):
     """Basically the main().
 
+    :param ip: Switch IP address
+    :type ip: str
+    :param user_id: User ID
+    :type user_id: str
+    :param pw: User password
+    :type ip: str
+    :param sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
+    :type sec: str, None
+    :param fid_l: FID(s) to delete
+    :type fid_l: list
     :return: Exit code
     :rtype: int
     """
     ec = 0
-
-    # Get and condition the command line input
-    ip, user_id, pw, sec, fid, echo = _get_input()
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
@@ -195,16 +133,22 @@ def pseudo_main():
 
     # Delete the logical switch(es)
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
-        for fid in _get_fid_list(session) if '*' in fid else gen_util.range_to_list(fid):
-            buf = 'Deleting FID ' + str(fid) + '. This will take about 20 sec + 25 sec per group of 32 ports.'
+        if len(fid_l) == 0:
+            fid_l = _get_fid_list(session)
+        for fid in fid_l:
+            buf = ('Deleting FID ' + str(fid) + '. This will take about 20 sec per switch + 40 sec per group of 32 '
+                                                'ports.')
             brcdapi_log.log(buf, echo=True)
-            obj = brcdapi_switch.delete_switch(session, fid, echo)
+            obj = brcdapi_switch.delete_switch(session, fid, echo=True)
             if fos_auth.is_error(obj):
                 brcdapi_log.log(['Error deleting FID ' + str(fid), fos_auth.formatted_error_msg(obj)], echo=True)
                 ec = -1
 
-    except BaseException as e:  # To ensure the logout is executed no matter what went wrong
-        brcdapi_log.log('Encountered a programming error', echo=True)
+    except brcdapi_util.VirtualFabricIdError:
+        brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+        ec = -1
+    except BaseException as e:
+        brcdapi_log.exception(['Programming error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
         ec = -1
 
     # Logout
@@ -214,17 +158,61 @@ def pseudo_main():
 
     return ec
 
+
+def _get_input():
+    """Parses the module load command line
+
+    :return: Exit code
+    :rtype: int
+    """
+    global __version__, _input_d
+
+    ec = 0
+
+    # Get command line input
+    args_d = gen_util.get_input('Delete logical switches.', _input_d)
+
+    # Set up logging
+    if args_d['d']:
+        brcdapi_rest.verbose_debug(True)
+    brcdapi_log.open_log(folder=args_d['log'], suppress=args_d['sup'], no_log=args_d['nl'])
+
+    # Convert the FID range to a list
+    args_fid_l, args_fid_help = list(), ''
+    if args_d['fid'] != '*':
+        args_fid_l = gen_util.range_to_list(args_d['fid'])
+        args_fid_help = brcdapi_util.validate_fid(args_fid_l)
+        if len(args_fid_help) > 0:
+            args_fid_help = ' *ERROR: ' + args_fid_help
+            ec = -1
+
+    # Command line feedback
+    ml = ['switch_delete.py:    ' + __version__,
+          'IP, -ip:             ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
+          'ID, -id:             ' + args_d['id'],
+          'Security, -s:        ' + args_d['s'],
+          'FID, -fid:           ' + args_d['fid'] + args_fid_help,
+          'Log, -log:           ' + str(args_d['log']),
+          'No log, -nl:         ' + str(args_d['nl']),
+          'Debug, -d:           ' + str(args_d['d']),
+          'Suppress, -sup:      ' + str(args_d['sup']),
+          '',]
+    brcdapi_log.log(ml, echo=True)
+
+    return ec if ec != 0 else \
+        pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['s'], args_fid_l)
+
+
 ###################################################################
 #
 #                    Main Entry Point
 #
 ###################################################################
-
-
-_ec = 0
 if _DOC_STRING:
     print('_DOC_STRING is True. No processing')
-else:
-    _ec = pseudo_main()
-    brcdapi_log.close_log('Processing complete. Exit status: ' + str(_ec), echo=True)
-exit(_ec)
+    exit(brcddb_common.EXIT_STATUS_OK)
+
+if _STAND_ALONE:
+    _ec = _get_input()
+    brcdapi_log.close_log(['', 'Processing Complete. Exit code: ' + str(_ec)], echo=True)
+    exit(_ec)
