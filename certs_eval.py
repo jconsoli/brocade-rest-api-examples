@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
+Copyright 2023, 2024, 2025 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
+
 :mod:`certs_eval` - General report on certs
 
 **Description**
@@ -30,7 +29,7 @@
     * Delete certificates.
 
     To facilitate passing parameters via different passes, I used an Excel workbook. I'm assuming most people will use a
-    different interface so I didn't spend a lot of time on error checking and other niceties. It's just good enough for
+    different interface, so I didn't spend a lot of time on error checking and other niceties. It's just good enough for
     a demo. I did add more comments than usual to make it easier to walk through the code. Scroll to the bottom of this
     script to see where it all gets started.
 
@@ -74,7 +73,7 @@
     +===============+=======+===========================================================================+
     | update        | bool  | If True, the cert exists and meets the criteria for update.               |
     +---------------+-------+---------------------------------------------------------------------------+
-    | missing       | bool  | If True, the cert specified to be checked for an update does not exists   |
+    | missing       | bool  | If True, the cert specified to be checked for an update does not exist    |
     |               |       | on the switch yet.                                                        |
     +---------------+-------+---------------------------------------------------------------------------+
     | begins        | str   | Human readable time stamp for when the cert is valid                      |
@@ -94,23 +93,26 @@
     * FOS 9.1.0 or higher
     * Python 3.3 or higher
 
-Version Control::
+**Version Control**
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+-----------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                       |
++===========+===============+===================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Set verbose debug via brcdapi.brcdapi_rest.verbose_debug()                        |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Replaced obsolete "supress" in call to brcdapi_log.open_log with "suppress".          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import datetime
 import argparse
@@ -131,7 +133,10 @@ import brcdapi.gen_util as gen_util
 import brcdapi.util as brcdapi_util
 
 _DOC_STRING = False  # Should always be False. Prohibits any code execution. Only useful for building documentation
-_DEBUG = False  # Intended for use with development tools. When True, use _DEBUG_xxx below instead of passed arguments
+# When _DEBUG is True, use _DEBUG_xxx below instead of parameters passed from the command line. I did it this way,
+# rather than rely on parameter passing with IDE tools because the API examples are typically used as programming
+# examples, not stand-alone scripts. It's easier to modify the inputs this way.
+_DEBUG = False
 _DEBUG_i = 'test/test_input'
 _DEBUG_a = 'eval'
 _DEBUG_r = None
@@ -219,7 +224,7 @@ def _extract_certificate(file):
 
     :param file: Standard PEM file.
     :type file: str
-    :return: The certificates parsed from the file contents. None if an error occured or no certificated found
+    :return: The certificates parsed from the file contents. None if an error occurred or no certificated found
     :rtype: str, None
     """
     global _begin_obj, _end_obj, _end
@@ -231,7 +236,7 @@ def _extract_certificate(file):
         buf = f.read().decode(brcdapi_util.encoding_type, errors='ignore').replace('\r', '')
         f.close()
     except FileNotFoundError:
-        brcdapi_log.log('  File not found: ' + file, True)
+        brcdapi_log.log('  File not found: ' + file, echo=True)
         return None
 
     # Parse out just the certificates & keys
@@ -239,7 +244,8 @@ def _extract_certificate(file):
     while begin_i >= 0:
         end_i = buf.find(_end_obj)
         if end_i < begin_i:
-            brcdapi_log.log('Corrupted PEM file. Mismatched ' + _begin_obj + ' and ' + _end_obj + ' in ' + file, True)
+            brcdapi_log.log('Corrupted PEM file. Mismatched ' + _begin_obj + ' and ' + _end_obj + ' in ' + file,
+                            echo=True)
             return None
         end_i += len(_end_obj)
         end_i += buf[end_i:].find(_end) + len(_end)
@@ -406,9 +412,9 @@ def _create_report(input_d, report_type):
     try:
         wb.save(report_name)
     except FileNotFoundError:
-        brcdapi_log.log('Folder in path ' + report_name + ' does not exist.', True)
+        brcdapi_log.log('Folder in path ' + report_name + ' does not exist.', echo=True)
     except PermissionError:
-        brcdapi_log.log('Could not write ' + report_name + ' because it is open in another application.', True)
+        brcdapi_log.log('Could not write ' + report_name + ' because it is open in another application.', echo=True)
 
 
 def _eval_certs(switch_d):
@@ -440,7 +446,7 @@ def _eval_certs(switch_d):
         else:
             buf = '  Could not evaluate because "days" was not specified in the input workbook for '
             buf += cert_d['certificate-entity'] + ', ' + cert_d['certificate-type']
-            brcdapi_log.log(buf, True)
+            brcdapi_log.log(buf, echo=True)
 
     return
 
@@ -454,7 +460,7 @@ def _del_cert(session, entity, cert_type):
     :type entity: str
     :param cert_type: Certificate type
     :type cert_type: str
-    :return: True: Successfully deleted the certificate. False: An error occured while attempting to delete the cert.
+    :return: True: Successfully deleted the certificate. False: An error occurred while attempting to delete the cert.
     :rtype: bool
     """
     content = {
@@ -468,7 +474,8 @@ def _del_cert(session, entity, cert_type):
                                     'DELETE',
                                     content)
     if fos_auth.is_error(obj):
-        brcdapi_log.log(['  Error deleting '+entity+', '+cert_type, '    '+fos_auth.formatted_error_msg(obj)], True)
+        brcdapi_log.log(['  Error deleting '+entity+', '+cert_type, '    '+fos_auth.formatted_error_msg(obj)],
+                        echo=True)
         return False
 
     return True
@@ -481,11 +488,12 @@ def _generate_csr(session, param_d):
     :type session: dict
     :param param_d: One of the dictionaries in the list of parameters ('param_l' in input_d returned from _get_input())
     :type param_d: dict
-    :return: True: Successfully generated the CSR. False: An error occured while attempting to generate the CSR.
+    :return: True: Successfully generated the CSR. False: An error occurred while attempting to generate the CSR.
     :rtype: bool
     """
     global _alt_name
 
+    buf = 'Pre Sales' if param_d.get('organization-name') is None else param_d.get('organization-name')
     sub_content = {  # Put your own defaults in here
         'certificate-entity': 'csr',
         'certificate-type': param_d['certificate-type'],
@@ -496,8 +504,7 @@ def _generate_csr(session, param_d):
         'country-name': 'US' if param_d.get('country-name') is None else param_d.get('country-name'),
         'state-name': 'CA' if param_d.get('state-name') is None else param_d.get('state-name'),
         'locality-name': 'San Jose' if param_d.get('locality-name') is None else param_d.get('locality-name'),
-        'organization-name': 'Pre Sales' if param_d.get('organization-name') is None else \
-            param_d.get('organization-name'),
+        'organization-name': buf,
         'unit-name': 'BSN' if param_d.get('unit-name') is None else param_d.get('unit-name'),
         'domain-name': 'brm.bsnlab.broadcom.net' if param_d.get('domain-name') is None else param_d.get('domain-name')
     }
@@ -515,7 +522,7 @@ def _generate_csr(session, param_d):
                                     content)
     if fos_auth.is_error(obj):
         brcdapi_log.log(['  Error generating CSR for ' + param_d['certificate-entity']+', '+param_d['certificate-type'],
-                         '    ' + fos_auth.formatted_error_msg(obj)], True)
+                         '    ' + fos_auth.formatted_error_msg(obj)], echo=True)
         return False
 
     return True
@@ -532,7 +539,7 @@ def _extract_cert_or_csr(switch_d, entity, cert_type, out_file):
     :type cert_type: str
     :param out_file: Name of output file. May include pathing.
     :type out_file: str
-    :return: True: Successfully exported the certificate. False: An error occured while attempting to export the cert.
+    :return: True: Successfully exported the certificate. False: An error occurred while attempting to export the cert.
     :rtype: bool
     """
     new_cert_l = _get_certs(switch_d)
@@ -540,19 +547,20 @@ def _extract_cert_or_csr(switch_d, entity, cert_type, out_file):
         if n_cert_d['certificate-entity'] == entity and n_cert_d['certificate-type'] == cert_type:
             hexdump = n_cert_d.get('certificate-hexdump')
             if isinstance(hexdump, str) and len(hexdump) > 0:
-                brcdapi_log.log('  Writing ' + entity + ', ' + cert_type + ' to ' + out_file, True)
+                brcdapi_log.log('  Writing ' + entity + ', ' + cert_type + ' to ' + out_file, echo=True)
                 try:
                     with open(out_file, 'w') as f:
                         f.write(hexdump)
                         return True
                 except FileNotFoundError:
-                    brcdapi_log.log('  Folder in ' + out_file + ' not found.', True)
+                    brcdapi_log.log('  Folder in ' + out_file + ' not found.', echo=True)
                     return False
             else:
-                brcdapi_log.log('  No certificate associated with ' + entity + ', ' + cert_type, True)
+                brcdapi_log.log('  No certificate associated with ' + entity + ', ' + cert_type, echo=True)
                 return False
 
-    brcdapi_log.log('  ' + entity + ', ' + cert_type + ' does not exist.', True)
+    brcdapi_log.log('  ' + entity + ', ' + cert_type + ' does not exist.', echo=True)
+
     return False
 
 
@@ -567,12 +575,12 @@ def _add_cert(session, entity, cert_type, cert_file):
     :type cert_type: str
     :param cert_file: Name of file containing the certificate generated from a CA.
     :type cert_file: str
-    :return: True: Successfully added the certificate. False: An error occured while attempting to add the cert.
+    :return: True: Successfully added the certificate. False: An error occurred while attempting to add the cert.
     :rtype: bool
     """
     hexdump = _extract_certificate(cert_file)
     if hexdump is None:
-        brcdapi_log.log('  No certificates found in ' + cert_file, True)
+        brcdapi_log.log('  No certificates found in ' + cert_file, echo=True)
         return False
 
     content = {
@@ -585,7 +593,8 @@ def _add_cert(session, entity, cert_type, cert_file):
     }
     obj = brcdapi_rest.operations_request(session, 'operations/security-certificate', 'POST', content)
     if fos_auth.is_error(obj):
-        brcdapi_log.log(['  Error adding ' + entity + ', ' + cert_type, '    '+fos_auth.formatted_error_msg(obj)], True)
+        brcdapi_log.log(['  Error adding ' + entity + ', ' + cert_type, '    '+fos_auth.formatted_error_msg(obj)],
+                        echo=True)
         return False
 
     return True
@@ -616,12 +625,13 @@ def _add_cert_action(switch_d):
         if isinstance(cert_file, str) and len(cert_file) > 0:
             csr_file = brcdapi_file.full_file_name(cert_file, '.pem')
             cert_entity, cert_type = param_d['certificate-entity'], param_d['certificate-type']
-            brcdapi_log.log('  Adding ' + csr_file + ' for ' + cert_entity + ', ' + cert_type, True)
+            brcdapi_log.log('  Adding ' + csr_file + ' for ' + cert_entity + ', ' + cert_type, echo=True)
             if _add_cert(switch_d['_session'], cert_entity, cert_type, csr_file):
-                brcdapi_log.log('  Successfully added ' + csr_file + ' for ' + cert_entity + ', ' + cert_type, True)
+                brcdapi_log.log('  Successfully added ' + csr_file + ' for ' + cert_entity + ', ' + cert_type,
+                                echo=True)
         else:
             brcdapi_log.log('  Missing cert file for ' + param_d['certificate-entity'] + ', ' +
-                            param_d['certificate-type'], True)
+                            param_d['certificate-type'], echo=True)
 
 
 def _del_cert_action(switch_d):
@@ -643,11 +653,11 @@ def _del_cert_action(switch_d):
         if isinstance(hexdump, str) and len(hexdump) > 0:
 
             # Delete the certificate
-            brcdapi_log.log('  Deleting ' + param_entity + ', ' + param_type, True)
+            brcdapi_log.log('  Deleting ' + param_entity + ', ' + param_type, echo=True)
             if not _del_cert(session, param_entity, param_type):
                 raise IOError  # An error message is logged in _del_cert() if this occurs so just bail out.
 
-            # If the HTTPs cert was deleted, the interface reverts back to HTTP so we will need to re-login
+            # If the HTTPs cert was deleted, the interface reverts back to HTTP, so we will need to re-login
             if param_entity == 'cert' and param_type == 'https':
                 # It typically takes 5-6 seconds for the interface to be restored after deleting a certificate. The
                 # driver will retry if the interface is busy so the sleep below is not necessary but rather than
@@ -659,7 +669,7 @@ def _del_cert_action(switch_d):
                 if switch_d['_session'] is None:
                     raise IOError  # An error message is logged in _login() if this occurs so just bail out.
         else:
-            brcdapi_log.log('  Cert does not exist: ' + param_entity + ', ' + param_type, True)
+            brcdapi_log.log('  Cert does not exist: ' + param_entity + ', ' + param_type, echo=True)
             continue
 
 
@@ -695,21 +705,21 @@ def _csr_action(switch_d):
         if csr_file is None:
             e_buf = 'WARNING: No output file for ' + switch_d['ip_addr'] + ', ' + param_d['certificate-type']
             e_buf += '. a CSR was not generated.'
-            brcdapi_log.log(['', e_buf, ''], True)
+            brcdapi_log.log(['', e_buf, ''], echo=True)
             return
         csr_file = brcdapi_file.full_file_name(csr_file, '.csr')
 
         # Step 2: Before generating a CSR, check for existing certificates and if they exist, delete them. While
         # reviewing the code and adding comments I realized that I'm only deleting the cert. Since a CSR is being
-        # generated, the associated ca-server should be deleted. Deleting the ca-server cert is best practice but it's
+        # generated, the associated ca-server should be deleted. Deleting the ca-server cert is best practice, but it's
         # going to get over written. I figured this was good enough for what this module was intended for. I already
         # finished testing and didn't want to circle back to more testing.
-        brcdapi_log.log('  Checking for exising certs to remove before generating the CSR', True)
+        brcdapi_log.log('  Checking for exising certs to remove before generating the CSR', echo=True)
         _del_cert_action(switch_d)
 
         # Step 3: Generate the CSR
-        brcdapi_log.log('  Generating ' + param_d['certificate-entity'] + ', ' + param_d['certificate-type'], True)
-        if not _generate_csr(session, param_d):
+        brcdapi_log.log('  Generating ' + param_d['certificate-entity'] + ', ' + param_d['certificate-type'], echo=True)
+        if not _generate_csr(session, param_d):  # _generate_csr - logs error messages if any
             return  # Not sure what is wrong with this switch so return without causing any more damage
 
         # Step 4: Read the CSR back and write it out to a file
@@ -740,7 +750,7 @@ def _get_certs(switch_d):
     :rtype: list
     """
     session = switch_d['_session']
-    brcdapi_log.log('  Reading certificates. This will take 40-60 sec.', True)
+    brcdapi_log.log('  Reading certificates. This will take 40-60 sec.', echo=True)
 
     # Get the certificates from the API
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Disable self-signed cert warnings
@@ -764,7 +774,7 @@ def _get_certs(switch_d):
         if not isinstance(hexdump, str):  # Do a cert_d.get below because I have no idea what went wrong if we get here
             buf = '  Invalid certificate for ' + str(cert_d.get('certificate-entity')) + ', '
             buf += str(cert_d.get('certificate-type'))
-            brcdapi_log.log(buf, True)
+            brcdapi_log.log(buf, echo=True)
             hexdump = ''
         if len(hexdump) > 0:
             # With the cryptography library 3.1 and above, default_backend() is used if not specified. Earlier versions
@@ -793,13 +803,14 @@ def _login(switch_d):
     :type switch_d: dict
     """
     sec = 'none' if switch_d['security'] is None else switch_d['security']
-    brcdapi_log.log('  Attempting login', True)
+    brcdapi_log.log('  Attempting login', echo=True)
     session = brcdapi_rest.login(switch_d['user_id'], switch_d['pw'], switch_d['ip_addr'], sec)
     if fos_auth.is_error(session):
-        brcdapi_log.log(['  Login failed. Error message is:', '    ' + fos_auth.formatted_error_msg(session)], True)
+        brcdapi_log.log(['  Login failed. Error message is:', '    ' + fos_auth.formatted_error_msg(session)],
+                        echo=True)
         switch_d['_session'] = None
     else:
-        brcdapi_log.log('  Login succeeded', True)
+        brcdapi_log.log('  Login succeeded', echo=True)
         switch_d['_session'] = session
 
 
@@ -811,12 +822,13 @@ def _logout(switch_d):
     """
     session = switch_d.get('_session')
     if session is not None:
-        brcdapi_log.log('  Attempting logout', True)
+        brcdapi_log.log('  Attempting logout', echo=True)
         obj = brcdapi_rest.logout(session)
         if fos_auth.is_error(obj):
-            brcdapi_log.log(['  Logout failed. Error message is:', '    ' + fos_auth.formatted_error_msg(obj)], True)
+            brcdapi_log.log(['  Logout failed. Error message is:', '    ' + fos_auth.formatted_error_msg(obj)],
+                            echo=True)
         else:
-            brcdapi_log.log('  Logout succeeded.', True)
+            brcdapi_log.log('  Logout succeeded.', echo=True)
 
 
 def _get_input():
@@ -870,7 +882,7 @@ def _get_input():
     global _DEBUG_i, _DEBUG_a, _DEBUG_r, _DEBUG_sup, _DEBUG_d, _DEBUG_log, _DEBUG_nl, _login_keys, _valid_actions
     global _report_defaults, _param_keys, _alt_names
 
-    ec, rd = 0, dict()
+    ec, rd, input_d, last_param_d = 0, dict(), dict(), dict()
 
     if _DEBUG:
         args_i, args_a, args_r, args_sup, args_d, args_log, args_nl = \
@@ -904,12 +916,14 @@ def _get_input():
             args.i, args.a, args.r, args.sup, args.d, args.log, args.nl
 
     # Set up the log file
-    if args_sup:
-        brcdapi_log.set_suppress_all()
-    if not args_nl:
-        brcdapi_log.open_log(args_log)
+    brcdapi_log.open_log(
+        folder=args_log,
+        suppress=args_sup,
+        version_d=brcdapi_util.get_import_modules(),
+        no_log=args_nl
+    )
     if args_d:  # Verbose debug
-        brcdapi_rest.verbose_debug = True
+        brcdapi_rest.verbose_debug(True)
 
     # ml is a list of message to display with user feedback. Error messages may be added.
     ml = ['WARNING: Debug mode is enabled'] if _DEBUG else list()
@@ -938,7 +952,7 @@ def _get_input():
             ec = -1
 
     if ec == 0:
-        # Parse the input file - The desire is to login to each switch just once. Since human factors are involved in
+        # Parse the input file - The desire is to log in to each switch just once. Since human factors are involved in
         # editing the workbooks, the return dictionary is organized by switch.
         row, last_d, new_switch = 2, None, False
         for d in input_d['content']:
@@ -956,7 +970,7 @@ def _get_input():
                     ip_d.update({key: d.get(key)})
                 new_switch, last_d = True, ip_d
 
-            # Add the parameters for this switch. I missed alternative subject names so shoe horned them in afterwards
+            # Add the parameters for this switch. I missed alternative subject names so shoe horned them in afterward
             update_flag, temp_d = False, dict()
             for key in _param_keys:  # Add the parameters
                 v = d.get(key)
@@ -971,7 +985,7 @@ def _get_input():
                 new_switch = False
             for key in _alt_names:
                 if d.get(key) is not None:
-                    alt_l = last_param_d.get(key)
+                    alt_l = last_param_d.get(key, list())
                     alt_l.extend(d[key].split(';'))
 
             row += 1
@@ -980,13 +994,13 @@ def _get_input():
     if len(rd.keys()) == 0:
         ml.append('No content found in ' + args_i)
         ec = -1
-    brcdapi_log.log(ml, True)
+    brcdapi_log.log(ml, echo=True)
 
     return ec, rd
 
 
 def pseudo_main():
-    """Basically the main(). Did it this way so it can easily be modified to be called from another script.
+    """Basically the main(). Did it this way, so it can easily be modified to be called from another script.
 
     :return: Exit code. See exit codes in brcddb.brcddb_common
     :rtype: int
@@ -999,7 +1013,7 @@ def pseudo_main():
         return ec
 
     for ip_addr in [k for k in input_d.keys() if k[0] != '_']:
-        brcdapi_log.log(['', 'Switch: ' + brcdapi_util.mask_ip_addr(ip_addr)], True)
+        brcdapi_log.log(['', 'Switch: ' + brcdapi_util.mask_ip_addr(ip_addr)], echo=True)
         switch_d = input_d[ip_addr]
 
         # Login
@@ -1011,8 +1025,12 @@ def pseudo_main():
         try:  # This try is to ensure the logout code gets executed regardless of what happens.
             switch_d['_certs_l'] = _get_certs(switch_d)  # Get and add the list of certs to switch_d
             _valid_actions[input_d['_action']]['a'](switch_d)
+        except brcdapi_util.VirtualFabricIdError:
+            brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+            ec = -1
         except BaseException as e:
-            brcdapi_log.exception('Programming error encountered. Exception is: ' + str(e), True)
+            brcdapi_log.exception(['Programming error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
+            ec = -1
 
         # Logout
         _logout(switch_d)  # Error messages, if any, are logged in _logout()

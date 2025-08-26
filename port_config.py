@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
+Copyright 2023, 2024, 2025 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
+
 :mod:`port_config.py` - Examples on how to modify port configuration parameters.
 
 **Description**
@@ -27,14 +26,14 @@
 
 **Examples**
 
-    In the table below, the "Action" column is used with the -a option when running this script from a shell. If
+    In the table below, the "Action" column is used with the "-a" option when running this script from a shell. If
     interested in how that aspect of this script works, search for _action_tbl_d. If all you are looking for are code
     examples, just search for the methods.
 
     |-----------------------+-----------+-----------------------------------------------------------+
     | Method                | Action    | Description                                               |
     |=======================+===========+===========================================================+
-    | _action_name          | name      | Assigns user friendly name to a port or list of ports.    |
+    | _action_name          | name      | Assigns user-friendly name to a port or list of ports.    |
     |-----------------------+-----------+-----------------------------------------------------------+
     | _action_disable       | disable   | Disable a port or list of ports.                          |
     |-----------------------+-----------+-----------------------------------------------------------+
@@ -63,23 +62,26 @@
     | _action_release       | release   | Releases POD license for ports.                           |
     |-----------------------+-----------+-----------------------------------------------------------+
 
-Version Control::
+**Version Control**
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+---------------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                           |
++===========+===============+=======================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                             |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Set verbose debug via brcdapi.brcdapi_rest.verbose_debug()                            |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Replaced obsolete "supress" in call to brcdapi_log.open_log with "suppress".          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -91,14 +93,17 @@ import brcdapi.port as brcdapi_port
 import brcdapi.file as brcdapi_file
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
-_DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_ip = 'xx.xxx.xx.xx'
+# When _DEBUG is True, use _DEBUG_xxx below instead of parameters passed from the command line. I did it this way,
+# rather than rely on parameter passing with IDE tools because the API examples are typically used as programming
+# examples, not stand-alone scripts. It's easier to modify the inputs this way.
+_DEBUG = False
+_DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
+_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_fid = '128'
-_DEBUG_p = '0/0-3'  # Use s/p notation for directors
-_DEBUG_a = 'disable'
+_DEBUG_p = '0/3'  # Use s/p notation for directors
+_DEBUG_a = 'default'
 _DEBUG_d = True  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_sup = False
 _DEBUG_log = '_logs'
@@ -111,7 +116,7 @@ _DEBUG_nl = False
 #
 ####################################################################
 def _action_name(session, fid, in_port_l):
-    """Assigns user friendly name to a port or list of ports.
+    """Assigns user-friendly name to a port or list of ports.
 
     :param session: FOS session object
     :type session: dict
@@ -199,9 +204,9 @@ def _action_enable_eport(session, fid, in_port_l):
     """Enables ports for use as an E-Port. See _action_name() parameters and return value definitions"""
     # Since users may be using the port list for names, 's/p:name', below strips out the name
     return brcdapi_port.e_port(session,
-                                     fid,
-                                     [p.split(':')[0] for p in in_port_l],  # port list
-                                     mode=True)
+                               fid,
+                               [p.split(':')[0] for p in in_port_l],  # port list
+                               mode=True)
 
 
 def _action_disable_eport(session, fid, in_port_l):
@@ -288,13 +293,13 @@ def _get_input():
     :rtype id: str
     :return pw: User password
     :rtype ip: str
-    :return sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self signed
+    :return sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
     :rtype sec: str, None
     :return fid: FID associated with the ports, port_l
     :rtype fid: str
-    :return port_l: List of ports to operate on
+    :return port_l: Ports to operate on
     :rtype port_l: list
-    :return action: List of actions to take
+    :return action: Actions to take
     :rtype action: list
     """
     global _DEBUG, _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_fid, _DEBUG_p, _DEBUG_a, _DEBUG_d, _DEBUG_sup
@@ -310,14 +315,16 @@ def _get_input():
         buf = 'Initially developed as programming examples. A shell interface was added to be run as a stand-alone '\
               'utility to modify port configurations.'
         parser = argparse.ArgumentParser(description=buf)
-        parser.add_argument('-ip', help='(Required) IP address', required=False)
-        parser.add_argument('-id', help='(Required) User ID', required=False)
-        parser.add_argument('-pw', help='(Required) Password', required=False)
-        parser.add_argument('-s', help="(Optional) Default is HTTP. Use -s self for HTTPS mode.", required=False)
+        parser.add_argument('-ip', help='(Required unless -a is help) IP address', required=False)
+        parser.add_argument('-id', help='(Required unless -a is help) User ID', required=False)
+        parser.add_argument('-pw', help='(Required unless -a is help) Password', required=False)
+        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
+                            required=False)
         parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=False)
-        buf = '(Required) CSV list of ports or range of ports in s/p notation. Use "*" for all ports in FID. Any '\
-              'entry with "." in it is assumed to be a file to read the port list from. For action "name", use '\
-              's/p:port_name. "*" or a range of ports is not supported if the action, -a, is "name".'
+        buf = '(Required) CSV list of ports or range of ports in s/p notation. Use "*" for all ports in FID. You can '\
+              'also specify a plain text file containing port numbers. Any entry with "." in it is assumed to be a '\
+              'file to read the port list from. For action "name", use s/p:port_name. "*" or a range of ports is not '\
+              'supported if the action, -a, is "name".'
         parser.add_argument('-p', help=buf, required=False)
         buf = '(Required) CSV list of actions to take on the port list, -p. For a list of actions, enter "help".'
         parser.add_argument('-a', help=buf, required=True)
@@ -337,11 +344,17 @@ def _get_input():
 
     # Set up the log and debug parameters
     if args_d:
-        brcdapi_rest.verbose_debug = True
-    if args_sup:
-        brcdapi_log.set_suppress_all()
-    if not args_nl:
-        brcdapi_log.open_log(args_log)
+        brcdapi_rest.verbose_debug(True)
+    brcdapi_log.open_log(
+        folder=args_log,
+        suppress=args_sup,
+        version_d=brcdapi_util.get_import_modules(),
+        no_log=args_nl
+    )
+
+    # Default security
+    if args_s is None:
+        args_s = 'self'
 
     # Validate the actions:
     action_buf = args_a
@@ -434,7 +447,7 @@ def pseudo_main():
         elif '.' in args_p:  # Get the port list from a file
             try:
                 for buf in brcdapi_file.read_file(args_p, remove_blank=True, rc=True):
-                    port_l.extend(buf.split(','))  # So the file contents can be seperate lines or CSV or both
+                    port_l.extend(buf.split(','))  # So the file contents can be separate lines or CSV or both
             except FileNotFoundError:
                 brcdapi_log.log(['', 'File not found: ' + args_p, ''], echo=True)
                 ec = -1
@@ -459,15 +472,18 @@ def pseudo_main():
             else:
                 brcdapi_log.log('Successfully completed action: ' + action, echo=True)
 
+    except brcdapi_util.VirtualFabricIdError:
+        brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+        ec = -1
     except BaseException as e:
-        e_buf = str(e, errors='ignore') if isinstance(e, (bytes, str)) else str(type(e))
-        brcdapi_log.exception('Programming error encountered. Exception is: ' + e_buf, echo=True)
+        brcdapi_log.exception(['Programming error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
         ec = -1
 
     # Logout
     obj = brcdapi_rest.logout(session)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log(['Logout failed:', brcdapi_auth.formatted_error_msg(obj)], echo=True)
+        ec = -1
     else:
         brcdapi_log.log('Logout succeeded', echo=True)
 

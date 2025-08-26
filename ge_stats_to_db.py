@@ -34,16 +34,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.1     | 06 Dec 2024   | Fixed spelling mistake in message.                                                    |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Use brcdapi_util.get_import_modules() when opening log.                               |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2024 Consoli Solutions, LLC'
-__date__ = '06 Dec 2024'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
-__email__ = 'jack@consoli-solutions.com'
+__email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.1'
+__version__ = '4.0.2'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -210,9 +211,13 @@ def _get_input():
     args_d = gen_util.get_input('Delete logical switches.', _input_d)
 
     # Set up logging
-    if args_d['d']:
-        brcdapi_rest.verbose_debug(True)
-    brcdapi_log.open_log(folder=args_d['log'], suppress=args_d['sup'], no_log=args_d['nl'])
+    brcdapi_rest.verbose_debug(args_d['d'])
+    brcdapi_log.open_log(
+        folder=args_d['log'],
+        suppress=args_d['sup'],
+        version_d=brcdapi_util.get_import_modules(),
+        no_log=args_d['nl']
+    )
 
     # Command line feedback
     ml = ['ge_stats_to_db.py:   ' + __version__,

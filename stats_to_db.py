@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
+Copyright 2023, 2024, 2025 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
+
 :mod:`stats_to_db` - Example on how to capture port statistics and add them to your own database
 
 **Description**
@@ -27,25 +26,29 @@
     * Databases require unique keys.
     * Many database applications have key naming convention rules.
 
-Version Control::
+**Version Control**
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+---------------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                           |
++===========+===============+=======================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                             |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Set verbose debug via brcdapi.brcdapi_rest.verbose_debug()                            |
++-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Replaced obsolete "supress" in call to brcdapi_log.open_log with "suppress".          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import argparse
+import brcdapi.util as brcdapi_util
 import brcdapi.brcdapi_rest as brcdapi_rest
 import brcdapi.fos_auth as brcdapi_auth
 import brcdapi.log as brcdapi_log
@@ -55,7 +58,7 @@ _DEBUG = False   # When True, instead of getting input parameters from the comma
 _DEBUG_ip = 'xxx.xxx.xxx.xxx'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_sec = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self signed
+_DEBUG_sec = 'self'  # Use None or 'none' for HTTP. Use the certificate if HTTPS and not self-signed
 _DEBUG_fid = '128'
 _DEBUG_verbose = False  # When True, all content and responses are formatted and printed (pprint).
 _DEBUG_log = '_logs'
@@ -103,26 +106,34 @@ def parse_args():
     global _DEBUG, _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_verbose, _DEBUG_log, _DEBUG_nl
 
     if _DEBUG:
-        return _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_verbose, _DEBUG_log, _DEBUG_nl
+        args_ip, args_id, args_pw, args_s, args_fid, args_d, args_log, args_nl =\
+            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_verbose, _DEBUG_log, _DEBUG_nl
+    else:
+        buf = 'This is a programming example only. It illustrates how to capture port statistics and additional ' \
+              'information that is typical of a custom script to capture statistics and add them to a database.'
+        parser = argparse.ArgumentParser(description=buf)
+        parser.add_argument('-ip', help='(Required) IP address', required=True)
+        parser.add_argument('-id', help='(Required) User ID', required=True)
+        parser.add_argument('-pw', help='(Required) Password', required=True)
+        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
+                            required=False,)
+        parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=True)
+        buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
+        parser.add_argument('-d', help=buf, action='store_true', required=False)
+        buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The ' \
+              'log file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
+        parser.add_argument('-log', help=buf, required=False, )
+        buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
+        parser.add_argument('-nl', help=buf, action='store_true', required=False)
+        args = parser.parse_args()
+        args_ip, args_id, args_pw, args_s, args_fid, args_d, args_log, args_nl = \
+            args.ip, args.id, args.pw, args.s, args.fid, args.d, args.log, args.nl
 
-    buf = 'This is a programming example only. It illustrates how to capture port statistics and additional ' \
-          'information that is typical of a custom script to capture statistics and add them to a database.'
-    parser = argparse.ArgumentParser(description=buf)
-    parser.add_argument('-ip', help='(Required) IP address', required=True)
-    parser.add_argument('-id', help='(Required) User ID', required=True)
-    parser.add_argument('-pw', help='(Required) Password', required=True)
-    buf = '(Optional) Default is HTTP. Certificate or "self" for HTTPS mode.'
-    parser.add_argument('-s', help=buf, required=False,)
-    parser.add_argument('-fid', help='(Required) Virtual Fabric ID.', required=True)
-    buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
-    parser.add_argument('-d', help=buf, action='store_true', required=False)
-    buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The ' \
-          'log file name will always be "Log_xxxx" where xxxx is a time and date stamp.'
-    parser.add_argument('-log', help=buf, required=False, )
-    buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
-    parser.add_argument('-nl', help=buf, action='store_true', required=False)
-    args = parser.parse_args()
-    return args.ip, args.id, args.pw, args.s, args.fid, args.d, args.log, args.nl
+    # Default security
+    if args_s is None:
+        args_s = 'self'
+
+    return args_ip, args_id, args_pw, args_s, args_fid, args_d, args_log, args_nl
 
 
 def pseudo_main():
@@ -132,15 +143,17 @@ def pseudo_main():
     """
     global _DEBUG
 
+    ec, uri, fid, switch_wwn = 0, '', 0, None  # Error code. 0: No errors. -1: error encountered
+
     # Get the command line input
     ml = ['WARNING!!! Debug is enabled'] if _DEBUG else list()
     ip, user_id, pw, sec, fid_str, vd, log, nl = parse_args()
     if vd:
-        brcdapi_rest.verbose_debug = True
+        brcdapi_rest.verbose_debug(True)
     if sec is None:
         sec = 'none'
-    if not nl:
-        brcdapi_log.open_log(log)
+    brcdapi_log.open_log(folder=args_log, suppress=False, version_d=brcdapi_util.get_import_modules(), no_log=args_nl)
+
     ml.append('FID: ' + fid_str)
     try:
         fid = int(fid_str)
@@ -154,7 +167,6 @@ def pseudo_main():
         brcdapi_log.log('Login failed:\n' + brcdapi_auth.formatted_error_msg(session), True)
         return -1
 
-    ec = 0  # Error code. 0: No errors. -1: error encountered
     port_info_d = dict()  # Will use this to store basic port information
     port_stats_d = dict()  # Will use this to store port statistics in
 
@@ -170,18 +182,17 @@ def pseudo_main():
             ec = -1
         else:
             # Find the switch with the matching FID
-            switch_wwn = None
             for switch_obj in obj['fibrechannel-logical-switch']:
                 if switch_obj['fabric-id'] == fid:
                     switch_wwn = switch_obj['switch-wwn']
                     break
-            if switch_wwn is None:
-                brcdapi_log.log('Logical switch for FID ' + str(fid) + 'not found', True)
-                ec = -1
+                if switch_wwn is None:
+                    brcdapi_log.log('Logical switch for FID ' + str(fid) + 'not found', True)
+                    ec = -1
 
         # Get some basic port information
-        if ec == 0:  # Make sure we didn't encountered any errors above
-            # It's common to keep track of other port information, such as the user friendly name and FC address. Below
+        if ec == 0:  # Make sure we didn't encounter any errors above
+            # It's common to keep track of other port information, such as the user-friendly name and FC address. Below
             # captures this basic port information.
             brcdapi_log.log('Capturing basic port information.', True)
             uri = 'running/brocade-interface/fibrechannel'
@@ -191,12 +202,12 @@ def pseudo_main():
                 ec = -1
             else:
                 # To make it easier to match the port information with the port statistics, we're going to create a
-                # a dictionary using the port name (port number) as the key
+                # dictionary using the port name (port number) as the key
                 for port_obj in port_info['fibrechannel']:
                     port_info_d.update({port_obj['name']: port_obj})
 
         # Capture the port statistics
-        if ec == 0:  # Make sure we didn't encountered any errors above
+        if ec == 0:  # Make sure we didn't encounter any errors above
             brcdapi_log.log('Capturing port statistics', True)
             uri = 'running/brocade-interface/fibrechannel-statistics'
             port_stats = brcdapi_rest.get_request(session, uri, fid)
@@ -211,7 +222,7 @@ def pseudo_main():
                     port_stats_d.update({port_obj['name']: port_obj})
 
         # Add all the ports to the database
-        if ec == 0:  # Make sure we didn't encountered any errors above
+        if ec == 0:  # Make sure we didn't encounter any errors above
             brcdapi_log.log('Adding key value pairs to the database.', True)
             for port_num, port_obj in port_info_d.items():
                 sub_key = 'fcid-hex'  # Just using the FC address for this example
@@ -219,17 +230,22 @@ def pseudo_main():
                 for k, v in port_stats_d[port_num].items():
                     _db_add(switch_wwn, port_num, k, v)
 
-    except:  # Bare because I don't care what went wrong. I just want to logout
-        # The brcdapi_log.exception() method precedes the passed message parameter with a stack trace
-        brcdapi_log.exception('Unknown programming error occured while processing: ' + uri, True)
+    except brcdapi_util.VirtualFabricIdError:
+        brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+        ec = -1
+    except BaseException as e:
+        brcdapi_log.exception(['Programming error encountered while processing: ' + uri,
+                               str(type(e)) + ': ' + str(e)],
+                              echo=True)
+        ec = -1
 
     # Logout
     obj = brcdapi_rest.logout(session)
     if brcdapi_auth.is_error(obj):
         brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
-        return -1
+        ec = -1
 
-    return 0
+    return ec
 
 
 ###################################################################

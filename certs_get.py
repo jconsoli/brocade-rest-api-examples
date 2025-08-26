@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
+Copyright 2023, 2024, 2025 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
+
 :mod:`certs_get` - Read and generate a report of security certificates.
 
 **Description**
@@ -22,23 +21,26 @@
     The intent of this module is to provide a programming example on how to GET and determine certificate begin and
     expiration dates.
 
-Version Control::
+**Version Control*
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+-----------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                       |
++===========+===============+===================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Set verbose debug via brcdapi.brcdapi_rest.verbose_debug()                        |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Replaced obsolete "supress" in call to brcdapi_log.open_log with "suppress".          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import argparse
 from cryptography import x509
@@ -50,18 +52,21 @@ import brcdapi.fos_auth as fos_auth
 import brcdapi.gen_util as gen_util
 
 _DOC_STRING = False  # Should always be False. Prohibits any code execution. Only useful for building documentation
-_DEBUG = False  # When True, use _DEBUG_xxx below instead of passed arguments
+# When _DEBUG is True, use _DEBUG_xxx below instead of parameters passed from the command line. I did it this way,
+# rather than rely on parameter passing with IDE tools because the API examples are typically used as programming
+# examples, not stand-alone scripts. It's easier to modify the inputs this way.
+_DEBUG = False
 _DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = 'self'
+_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_d = True
 _DEBUG_log = '_logs'
 _DEBUG_nl = False
 
 
 def _cert_detail_report(obj):
-    """Generates a user friendly cert report.
+    """Generates a user-friendly cert report.
 
     :param obj: Object returned from the API.
     :type obj: dict
@@ -72,11 +77,11 @@ def _cert_detail_report(obj):
         hexdump = cert_d.get('certificate-verbose')
         if isinstance(hexdump, str) and len(hexdump) > 0:
             buf = cert_d['certificate-entity'] + ', ' + cert_d['certificate-type'] + ' Detail:'
-            brcdapi_log.log(['', buf, '', hexdump], True)
+            brcdapi_log.log(['', buf, '', hexdump], echo=True)
 
 
 def _cert_summary_report(obj):
-    """Generates a user friendly cert report.
+    """Generates a user-friendly cert report.
 
     :param obj: Object returned from the API.
     :type obj: dict
@@ -110,7 +115,7 @@ def _cert_summary_report(obj):
         ml.append(to_display)
         ml.append(separator)
 
-    brcdapi_log.log(ml, True)
+    brcdapi_log.log(ml, echo=True)
 
 
 def _get_input():
@@ -122,7 +127,7 @@ def _get_input():
     :rtype user_id: str
     :return pw: Login password
     :rtype pw: str
-    :return sec: 'self' for self signed certificate (HTTPS) or 'none' (HTTP)
+    :return sec: 'self' for self-signed certificate (HTTPS) or 'none' (HTTP)
     :rtype sec: str
     """
     global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_d, _DEBUG_log, _DEBUG_nl
@@ -138,7 +143,8 @@ def _get_input():
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
         parser.add_argument('-pw', help='(Required) Password', required=True)
-        parser.add_argument('-s', help="(Optional) Default is HTTP. Use self for HTTPS mode.", required=False)
+        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
+                            required=False)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
         buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log' \
@@ -152,14 +158,13 @@ def _get_input():
             args.ip, args.id, args.pw, args.s, args.d, args.log, args.nl
 
     # Set up the log file
-    if not args_nl:
-        brcdapi_log.open_log(args_log)
+    brcdapi_log.open_log(folder=args_log, suppress=False, version_d=brcdapi_util.get_import_modules(), no_log=args_nl)
     if args_d:  # Verbose debug
-        brcdapi_rest.verbose_debug = True
+        brcdapi_rest.verbose_debug(True)
 
     # Condition the input
     if args_s is None:
-        args_s = 'none'
+        args_s = 'self'
 
     # User feedback about input.
     ml = ['WARNING: Debug mode is enabled'] if _DEBUG else list()
@@ -167,52 +172,60 @@ def _get_input():
                'ID, -id:                   ' + args_id,
                'Security, -sec:            ' + args_s,
                ''])
-    brcdapi_log.log(ml, True)
+    brcdapi_log.log(ml, echo=True)
 
     return args_ip, args_id, args_pw, args_s
 
 
 def pseudo_main():
-    """Basically the main(). Did it this way so it can easily be modified to be called from another script.
+    """Basically the main(). Did it this way, so it can easily be modified to be called from another script.
 
     :return: Exit code. See exit codes in brcddb.brcddb_common
     :rtype: int
     """
+    ec, cert_obj = 0, None
+
     # Get the command line input
     ip_addr, user_id, pw, sec = _get_input()
 
     # Login
-    brcdapi_log.log('Attempting login', True)
+    brcdapi_log.log('Attempting login', echo=True)
     session = brcdapi_rest.login(user_id, pw, ip_addr, sec)
     if fos_auth.is_error(session):
-        brcdapi_log.log('Login failed. Error message is:', True)
-        brcdapi_log.log(fos_auth.formatted_error_msg(session), True)
+        brcdapi_log.log('Login failed. Error message is:', echo=True)
+        brcdapi_log.log(fos_auth.formatted_error_msg(session), echo=True)
         return -1
-    brcdapi_log.log(['Login succeeded', 'Getting certificates. This will take about 30 sec.'], True)
+    brcdapi_log.log(['Login succeeded', 'Getting certificates. This will take about 30 sec.'], echo=True)
 
     try:  # This try is to ensure the logout code gets executed regardless of what happened.
         # Get the certificates from the API
         cert_obj = brcdapi_rest.get_request(session, 'running/brocade-security/security-certificate')
+    except brcdapi_util.VirtualFabricIdError:
+        brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+        ec = -1
     except BaseException as e:
-        brcdapi_log.exception('Unexpected error encountered. Exception is: ' + str(e), True)
+        brcdapi_log.exception(['Unexpected error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
+        ec = -1
 
     # Logout
-    brcdapi_log.log('Attempting logout', True)
+    brcdapi_log.log('Attempting logout', echo=True)
     obj = brcdapi_rest.logout(session)
     if fos_auth.is_error(obj):
-        brcdapi_log.log('Logout failed. Error message is:', True)
-        brcdapi_log.log(fos_auth.formatted_error_msg(obj), True)
-        return -1
-    brcdapi_log.log('Logout succeeded.', True)
+        brcdapi_log.log('Logout failed. Error message is:', echo=True)
+        brcdapi_log.log(fos_auth.formatted_error_msg(obj), echo=True)
+        ec = -1
+    else:
+        brcdapi_log.log('Logout succeeded.', echo=True)
 
     # Display the certificates
     if fos_auth.is_error(cert_obj):
-        brcdapi_log.exception('Failed to capture certificates.' + fos_auth.formatted_error_msg(cert_obj), True)
-        return -1
-    _cert_detail_report(cert_obj)
-    _cert_summary_report(cert_obj)
+        brcdapi_log.exception('Failed to capture certificates.' + fos_auth.formatted_error_msg(cert_obj), echo=True)
+        ec = -1
+    else:
+        _cert_detail_report(cert_obj)
+        _cert_summary_report(cert_obj)
 
-    return 0
+    return ec
 
 
 ###################################################################

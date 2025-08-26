@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Copyright 2023 Consoli Solutions, LLC.  All rights reserved.
-#
-# NOT BROADCOM SUPPORTED
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may also obtain a copy of the License at
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """
+Copyright 2023, 2024, 2025 Consoli Solutions, LLC.  All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may also obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.
+
+The license is free for single customer use (internal applications). Use of this module in the production,
+redistribution, or service delivery for commerce requires an additional license. Contact jack@consoli-solutions.com for
+details.
+
 :mod:`config_upload_download.py` - configupload/download examples.
 
 **Description**
@@ -42,23 +41,26 @@
     * Testing was limited to the mechanics of the protocol interface only. Certain observations made during that testing
       is reported in these comments but should not be construed as more extensive testing.
 
-Version Control::
+**Version Control**
 
-    +-----------+---------------+-----------------------------------------------------------------------------------+
-    | Version   | Last Edit     | Description                                                                       |
-    +===========+===============+===================================================================================+
-    | 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
-    +-----------+---------------+-----------------------------------------------------------------------------------+
++-----------+---------------+-----------------------------------------------------------------------------------+
+| Version   | Last Edit     | Description                                                                       |
++===========+===============+===================================================================================+
+| 4.0.0     | 04 Aug 2023   | Re-Launch                                                                         |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.1     | 06 Mar 2024   | Set verbose debug via brcdapi.brcdapi_rest.verbose_debug()                        |
++-----------+---------------+-----------------------------------------------------------------------------------+
+| 4.0.2     | 25 Aug 2025   | Replaced obsolete "supress" in call to brcdapi_log.open_log with "suppress".          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
-
 __author__ = 'Jack Consoli'
-__copyright__ = 'Copyright 2023 Consoli Solutions, LLC'
-__date__ = '04 August 2023'
+__copyright__ = 'Copyright 2023, 2024, 2025 Consoli Solutions, LLC'
+__date__ = '25 Aug 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.0'
+__version__ = '4.0.2'
 
 import argparse
 import pprint
@@ -69,11 +71,14 @@ import brcdapi.util as brcdapi_util
 import brcdapi.file as brcdapi_file
 
 _DOC_STRING = False  # Should always be False. Prohibits any actual I/O. Only useful for building documentation
-_DEBUG = False   # When True, use _DEBUG_xxx below instead of parameters passed from the command line.
-_DEBUG_ip = 'xx.xxx.x.xxx'
+# When _DEBUG is True, use _DEBUG_xxx below instead of parameters passed from the command line. I did it this way,
+# rather than rely on parameter passing with IDE tools because the API examples are typically used as programming
+# examples, not stand-alone scripts. It's easier to modify the inputs this way.
+_DEBUG = False
+_DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = 'self'  # Use None or 'none' for HTTP.
+_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_fid = '1'
 _DEBUG_sfid = None
 _DEBUG_a = 'down'
@@ -175,7 +180,8 @@ def _action_download(param_d):
                                           max_try=_MAX_CHECK)
     if fos_auth.is_error(obj):
         brcdapi_log.log(['Error downloading config for FID ' + str(fid),
-                         fos_auth.formatted_error_msg(obj)])
+                         fos_auth.formatted_error_msg(obj)],
+                        echo=True)
         el.append('Failed to restore FID ' + str(fid) + '. Check the log for details.')
     else:
         el.append('Successfully restored FID ' + str(fid))
@@ -221,7 +227,8 @@ def _get_input():
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
         parser.add_argument('-pw', help='(Required) Password', required=True)
-        parser.add_argument('-s', help="(Optional) Default is HTTP. Use -s self for HTTPS mode.", required=False)
+        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
+                            required=False)
         parser.add_argument('-f', help='(Required) upload/download file name. ".txt" is automatically appended',
                             required=True)
         buf = 'Required when -scope is: ' + ', '.join([str(k) for k in _scope_d.keys() if _scope_d[k]])
@@ -252,11 +259,19 @@ def _get_input():
 
     # Set up the log and debug parameters
     if args_d:
-        brcdapi_rest.verbose_debug = True
+        brcdapi_rest.verbose_debug(True)
     if args_sup:
         brcdapi_log.set_suppress_all()
-    if not args_nl:
-        brcdapi_log.open_log(args_log)
+    brcdapi_log.open_log(
+        folder=args_log,
+        suppress=args_sup,
+        version_d=brcdapi_util.get_import_modules(),
+        no_log=args_nl
+    )
+
+    # Default security
+    if args_s is None:
+        args_s = 'self'
 
     # Validate actions, -a
     action_buf = args_a
@@ -295,7 +310,7 @@ def _get_input():
           'Fabric ID, -fid:           ' + fid_buf,
           'Source Fabric ID, -sfid:   ' + sfid_buf,
           'Actions, -a:               ' + action_buf,
-          'Scope, -scope:             ' + args_scope + scope_buf,
+          'Scope, -scope:             ' + scope_buf,
           'port-to-area, -pa:         ' + str(args_pa)]
     if _DEBUG:
         ml.insert(0, 'WARNING!!! Debug is enabled')
@@ -337,8 +352,11 @@ def pseudo_main():
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
         brcdapi_log.log(_action_tbl_d[param_d['action']](param_d), echo=True)
 
+    except brcdapi_util.VirtualFabricIdError:
+        brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
+        ec = -1
     except BaseException as e:
-        brcdapi_log.log(['Programming error encountered. Exception is:', pprint.pformat(e)], echo=True)
+        brcdapi_log.exception(['Programming error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
         ec = -1
 
     # Logout
