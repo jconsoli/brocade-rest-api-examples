@@ -2,10 +2,15 @@
 
 Consoli Solutions, LLC
 jack@consoli-solutions.com
+jack_consoli@yahoo.com
 
 **Software Developers Kit (SDK)**
 
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
+
+**Updates 25 August 2025**
+
+*Added scc_policy.py and scan.py
 
 **Updates 6 March 2024**
 
