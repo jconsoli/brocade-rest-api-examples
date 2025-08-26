@@ -10,7 +10,7 @@ Sample scripts to create, delete, and modify switch, port, and zone using the Br
 
 **Updates 25 August 2025**
 
-* Updated comments only
+* Added list of libraries and version numbers to log
 
 **Updates 6 March 2024**
 
