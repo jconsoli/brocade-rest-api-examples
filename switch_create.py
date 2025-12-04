@@ -43,16 +43,19 @@ Scroll all the way to the bottom to find the entry point.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.2     | 19 Oct 2025   | Updated comments only.                                                                |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.3     | 04 Dec 2025   | Dynamically obtain file name instead of hard coding it for help message.              |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025 Consoli Solutions, LLC'
-__date__ = '19 Oct 2025'
+__date__ = '04 Dec 2025'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.2'
+__version__ = '4.0.3'
 
+import os
 import brcdapi.gen_util as gen_util
 import brcdapi.util as brcdapi_util
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -266,7 +269,7 @@ def _get_input():
     )
 
     ml = [
-        'switch_create.py version: ' + __version__,
+        os.path.basename(__file__) + ', ' + __version__,
         'IP, -ip:                  ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
         'ID, -id:                  ' + args_d['id'],
         'Security, -s:             ' + args_d['s'],
