@@ -8,6 +8,9 @@ jack_consoli@yahoo.com
 
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
 
+**Updates 04 December 2025**
+* Added ability to send CLI commands to multiple ports in port_config.py
+
 **Updates 25 August 2025**
 
 * Added list of libraries and version numbers to log
