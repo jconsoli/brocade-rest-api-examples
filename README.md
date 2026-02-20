@@ -1,12 +1,14 @@
 # brocade-rest-api-examples
 
-Consoli Solutions, LLC
-jack@consoli-solutions.com
+Jack Consoli
 jack_consoli@yahoo.com
 
 **Software Developers Kit (SDK)**
 
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
+
+**Update 20 Feb 2026**
+* Updated copyright notice
 
 **Updates 04 December 2025**
 * Added ability to send CLI commands to multiple ports in port_config.py
