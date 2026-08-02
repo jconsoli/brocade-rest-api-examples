@@ -40,15 +40,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -99,7 +101,7 @@ def _db_add(key_0, key_1, key_2, val):
     brcdapi_log.log('Adding key: ' + unique_key + ', Value: ' + str(val), True)
 
 
-def pseudo_main(ip, user_id, pw, sec, fid):
+def pseudo_main(ip, user_id, pw, fid):
     """Basically the main(). Did it this way to use with IDE
 
     :param ip: Switch IP address
@@ -108,8 +110,6 @@ def pseudo_main(ip, user_id, pw, sec, fid):
     :type user_id: str
     :param pw: User password
     :type ip: str
-    :param sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
-    :type sec: str, None
     :param fid: Fabric ID of logical switch the statistics will be collected from.
     :type fid: int
     :return: Exit code
@@ -118,7 +118,7 @@ def pseudo_main(ip, user_id, pw, sec, fid):
     ec, switch_wwn = 0, None  # Error code. 0: No errors. -1: error encountered
 
     # Login
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed:\n' + brcdapi_auth.formatted_error_msg(session), True)
         return -1
@@ -224,19 +224,20 @@ def _get_input():
     )
 
     # Command line feedback
-    ml = ['ge_stats_to_db.py:   ' + __version__,
-          'IP, -ip:             ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
-          'ID, -id:             ' + args_d['id'],
-          'Security, -s:        ' + args_d['s'],
-          'FID, -fid:           ' + args_d['fid'],
-          'Log, -log:           ' + str(args_d['log']),
-          'No log, -nl:         ' + str(args_d['nl']),
-          'Debug, -d:           ' + str(args_d['d']),
-          'Suppress, -sup:      ' + str(args_d['sup']),
-          '', ]
+    ml = [
+        'ge_stats_to_db.py:   ' + __version__,
+        'IP, -ip:             ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
+        'ID, -id:             ' + args_d['id'],
+        'FID, -fid:           ' + args_d['fid'],
+        'Log, -log:           ' + str(args_d['log']),
+        'No log, -nl:         ' + str(args_d['nl']),
+        'Debug, -d:           ' + str(args_d['d']),
+        'Suppress, -sup:      ' + str(args_d['sup']),
+        '',
+    ]
     brcdapi_log.log(ml, echo=True)
 
-    return pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['s'], args_d['fid'])
+    return pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['fid'])
 
 
 ###################################################################

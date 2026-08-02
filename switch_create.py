@@ -47,15 +47,17 @@ Scroll all the way to the bottom to find the entry point.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import os
 import brcdapi.gen_util as gen_util
@@ -98,7 +100,7 @@ class FOSError(Exception):
     pass
 
 
-def pseudo_main(ip, user_id, pw, sec, fid, name, did, idid, xisl, switch_type, port_l, ge_port_l):
+def pseudo_main(ip, user_id, pw, fid, name, did, idid, xisl, switch_type, port_l, ge_port_l):
     """Basically the main().
 
     :param ip: Switch IP address
@@ -107,8 +109,6 @@ def pseudo_main(ip, user_id, pw, sec, fid, name, did, idid, xisl, switch_type, p
     :type id: str
     :param pw: User password
     :type ip: str
-    :param sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
-    :type sec: str, None
     :param fid: Fabric ID (FID)
     :type fid: int
     :param name: Switch name.
@@ -136,7 +136,7 @@ def pseudo_main(ip, user_id, pw, sec, fid, name, did, idid, xisl, switch_type, p
 
     # Login
     brcdapi_log.log('Attempting login', True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if fos_auth.is_error(session):
         brcdapi_log.log(['Login failed. API error message is:', fos_auth.formatted_error_msg(session)], True)
         return -1
@@ -274,7 +274,6 @@ def _get_input():
         os.path.basename(__file__) + ', ' + __version__,
         'IP, -ip:                  ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
         'ID, -id:                  ' + args_d['id'],
-        'Security, -s:             ' + args_d['s'],
         'FID, -fid:                ' + str(args_d['fid']),
         'Name, -name:              ' + str(args_d['name']),
         'DID, -did:                ' + str(args_d['did']),
@@ -289,7 +288,7 @@ def _get_input():
     port_l = gen_util.sp_range_to_list(args_d['ports'])
     ge_port_l = gen_util.sp_range_to_list(args_d['ge_ports'])
 
-    return pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['s'], args_d['fid'], args_d['name'],
+    return pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['fid'], args_d['name'],
                        args_d['did'], args_d['idid'], args_d['xisl'], args_d['type'], port_l, ge_port_l)
 
 

@@ -41,15 +41,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import argparse
 import brcdapi.util as brcdapi_util
@@ -104,8 +106,8 @@ def _db_add(key_0, key_1, key_2, val):
 def parse_args():
     """Parses the module load command line
 
-    :return: ip, id, pw, sec, FID, verbose debug flag, log folder, log flag
-    :rtype: (str, str, str, str, str, bool, str, bool)
+    :return: ip, id, pw, FID, verbose debug flag, log folder, log flag
+    :rtype: (str, str, str, str, bool, str, bool)
     """
     global _DEBUG, _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_sec, _DEBUG_fid, _DEBUG_verbose, _DEBUG_log, _DEBUG_nl
 
@@ -130,14 +132,10 @@ def parse_args():
         buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
         args = parser.parse_args()
-        args_ip, args_id, args_pw, args_s, args_fid, args_d, args_log, args_nl = \
-            args.ip, args.id, args.pw, args.s, args.fid, args.d, args.log, args.nl
+        args_ip, args_id, args_pw, args_fid, args_d, args_log, args_nl = \
+            args.ip, args.id, args.pw, args.fid, args.d, args.log, args.nl
 
-    # Default security
-    if args_s is None:
-        args_s = 'self'
-
-    return args_ip, args_id, args_pw, args_s, args_fid, args_d, args_log, args_nl
+    return args_ip, args_id, args_pw, args_fid, args_d, args_log, args_nl
 
 
 def pseudo_main():
@@ -151,11 +149,9 @@ def pseudo_main():
 
     # Get the command line input
     ml = ['WARNING!!! Debug is enabled'] if _DEBUG else list()
-    ip, user_id, pw, sec, fid_str, vd, log, nl = parse_args()
+    ip, user_id, pw, fid_str, vd, log, nl = parse_args()
     if vd:
         brcdapi_rest.verbose_debug(True)
-    if sec is None:
-        sec = 'none'
     brcdapi_log.open_log(folder=args_log, suppress=False, version_d=brcdapi_util.get_import_modules(), no_log=args_nl)
 
     ml.append('FID: ' + fid_str)
@@ -166,7 +162,7 @@ def pseudo_main():
     brcdapi_log.log(ml, True)
 
     # Login
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed:\n' + brcdapi_auth.formatted_error_msg(session), True)
         return -1

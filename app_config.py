@@ -41,15 +41,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import argparse
 import pprint
@@ -66,7 +68,6 @@ _DEBUG = False
 _DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_rest_en = False
 _DEBUG_rest_dis = False
 _DEBUG_https_en = False
@@ -90,19 +91,17 @@ def _get_input():
     :rtype id: str
     :return pw: User password
     :rtype ip: str
-    :return sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
-    :rtype sec: str, None
     :return content: Content for "running/brocade-chassis/management-interface-configuration".
     :rtype content: dict
     """
-    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_rest_en, _DEBUG_rest_dis
+    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_rest_en, _DEBUG_rest_dis
     global _DEBUG_https_en, _DEBUG_https_dis, _DEBUG_max_rest, _DEBUG_ka_en, _DEBUG_ka_en
     global _DEBUG_d, _DEBUG_log, _DEBUG_nl
 
     ec = 0
 
     if _DEBUG:
-        args_ip, args_id, args_pw, args_s = _DEBUG_ip, _DEBUG_id, _DEBUG_pw, 'none' if _DEBUG_s is None else _DEBUG_s
+        args_ip, args_id, args_pw = _DEBUG_ip, _DEBUG_id, _DEBUG_pw
         args_rest_en, args_rest_dis, args_https_en, args_https_dis = \
             _DEBUG_rest_en, _DEBUG_rest_dis, _DEBUG_https_en, _DEBUG_https_dis
         args_max_rest, args_ka_en, args_ka_dis = \
@@ -116,8 +115,6 @@ def _get_input():
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
         parser.add_argument('-pw', help='(Required) Password', required=True)
-        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
-                            required=False)
         parser.add_argument('-rest_en', help='(Optional) No parameters. Enables the Rest interface',
                             action='store_true', required=False)
         parser.add_argument('-rest_dis', help='(Optional) No parameters. Disables the Rest interface',
@@ -142,7 +139,7 @@ def _get_input():
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
 
         args = parser.parse_args()
-        args_ip, args_id, args_pw, args_s = args.ip, args.id, args.pw, args.s
+        args_ip, args_id, args_pw = args.ip, args.id, args.pw
         args_rest_en, args_rest_dis, args_https_en, args_https_dis = \
             args.rest_en, args.rest_dis, args.https_en, args.https_dis
         args_max_rest, args_ka_en, args_ka_dis = args.max_rest, args.ka_en, args.ka_dis
@@ -152,10 +149,6 @@ def _get_input():
     brcdapi_log.open_log(folder=args_log, suppress=False, no_log=args_nl, version_d=brcdapi_util.get_import_modules())
     if args_d:  # Verbose debug
         brcdapi_rest.verbose_debug(True)
-
-    # Default security
-    if args_s is None:
-        args_s = 'self'
 
     rd = {
         'rest-enabled': True if args_rest_en else False if args_rest_dis else None,
@@ -168,7 +161,6 @@ def _get_input():
     ml = ['WARNING!!! Debug is enabled'] if _DEBUG else list()
     ml.append('IP, -ip:                      ' + brcdapi_util.mask_ip_addr(args_ip, True))
     ml.append('ID, -id:                      ' + args_id)
-    ml.append('Security, -s:                 ' + args_s)
     ml.append('Enable Rest, -rest_en:        ' + str(args_rest_en))
     ml.append('Disable Rest, -rest_dis:      ' + str(args_rest_dis))
     ml.append('Enable HTTPS, -https_en:      ' + str(args_https_en))
@@ -191,7 +183,7 @@ def _get_input():
         ml.extend(['', 'No changes'])
     brcdapi_log.log(ml, echo=True)
 
-    return ec, args_ip, args_id, args_pw, args_s, rd
+    return ec, args_ip, args_id, args_pw, rd
 
 
 def pseudo_main():
@@ -203,13 +195,13 @@ def pseudo_main():
     global _DEBUG
 
     # Get and validate command line input
-    ec, ip, user_id, pw, sec, input_d = _get_input()
+    ec, ip, user_id, pw, input_d = _get_input()
     if ec != 0:
         return ec
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if fos_auth.is_error(session):
         brcdapi_log.log(fos_auth.formatted_error_msg(session), echo=True)
         return -1

@@ -58,15 +58,17 @@ py switch_delete.py -ip xx.x.xxx.10 -id admin -pw password -s self -fid 20
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.5     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.6     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported. Added summary report.          |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.5'
+__version__ = '4.0.6'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -92,26 +94,32 @@ _input_d.update(gen_util.parseargs_debug_d.copy())
 
 
 def _get_fid_list(session):
-    """Returns a list of non-default switch fabric IDs
+    """Returns lists of FIDs, with and without the default switch, in the chassis
 
     :param session: Session object returned from brcdapi.fos_auth.login()
     :type session: dict
-    :return: List of FIDs as integers
-    :rtype: list
+    :return all_fids_l: All FIDs, as integers, found in the chassis
+    :rtype all_fids_l: list
+    :return no_def_fids_l: All FIDs, as integers, found in the chassis except the default switch.
+    :rtype no_def_fids_l: list
     """
     # Get the chassis information
-    obj = brcdapi_rest.get_request(session,
-                                   'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',
-                                   None)
+    obj = brcdapi_rest.get_request(
+        session,
+        'running/brocade-fibrechannel-logical-switch/fibrechannel-logical-switch',
+        None
+    )
     if fos_auth.is_error(obj):
         brcdapi_log.log(fos_auth.formatted_error_msg(obj), echo=True)
-    else:  # All FID numbers except the default switch.
-        return [d['fabric-id'] for d in obj['fibrechannel-logical-switch'] if d['default-switch-status'] != 1]
+        return list(), list()
 
-    return list()
+    all_fids_l = [d['fabric-id'] for d in obj['fibrechannel-logical-switch']]
+    no_def_fids_l = [d['fabric-id'] for d in obj['fibrechannel-logical-switch'] if d['default-switch-status'] != 1]
+
+    return all_fids_l, no_def_fids_l
 
 
-def pseudo_main(ip, user_id, pw, sec, fid_l):
+def pseudo_main(ip, user_id, pw, fid_l):
     """Basically the main().
 
     :param ip: Switch IP address
@@ -120,8 +128,6 @@ def pseudo_main(ip, user_id, pw, sec, fid_l):
     :type user_id: str
     :param pw: User password
     :type ip: str
-    :param sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
-    :type sec: str, None
     :param fid_l: FID(s) to delete
     :type fid_l: list
     :return: Exit code
@@ -131,17 +137,19 @@ def pseudo_main(ip, user_id, pw, sec, fid_l):
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if fos_auth.is_error(session):
         brcdapi_log.log(['Login failed. API error message is:', fos_auth.formatted_error_msg(session)], echo=True)
         return -1
     brcdapi_log.log('Login succeeded.', echo=True)
 
     # Delete the logical switch(es)
+    success_l, fail_l, start_fid_l, start_fid_d = list(), list(), list(), dict()
     try:  # I always do a try in code development so that if there is a code bug, I still log out.
-        if len(fid_l) == 0:
-            fid_l = _get_fid_list(session)
-        for fid in fid_l:
+        start_fid_l, no_default_switch_fid_l = _get_fid_list(session)
+        for fid in no_default_switch_fid_l:
+            start_fid_d[fid] = True
+        for fid in [f for f in fid_l if start_fid_d.get(f, False)]:
             buf = ('Deleting FID ' + str(fid) + '. This will take about 20 sec per switch + 40 sec per group of 32 '
                                                 'ports.')
             brcdapi_log.log(buf, echo=True)
@@ -149,6 +157,9 @@ def pseudo_main(ip, user_id, pw, sec, fid_l):
             if fos_auth.is_error(obj):
                 brcdapi_log.log(['Error deleting FID ' + str(fid), fos_auth.formatted_error_msg(obj)], echo=True)
                 ec = -1
+                fail_l.append(fid)
+            else:
+                success_l.append(fid)
 
     except brcdapi_util.VirtualFabricIdError:
         brcdapi_log.log('Software error. Search the log for "Invalid FID" for details.', echo=True)
@@ -157,10 +168,27 @@ def pseudo_main(ip, user_id, pw, sec, fid_l):
         brcdapi_log.exception(['Programming error encountered.', str(type(e)) + ': ' + str(e)], echo=True)
         ec = -1
 
+    # Get final fid list
+    end_fid_l, no_default_switch_fid_l = _get_fid_list(session)
+
     # Logout
     obj = brcdapi_rest.logout(session)
     if fos_auth.is_error(obj):
         brcdapi_log.log(['Logout failed. API error message is:',  fos_auth.formatted_error_msg(obj)], echo=True)
+
+    # Write a summary report
+    if ec == 0:
+        brcdapi_log.log(
+            [
+                '',
+                'Summary (by FID)',
+                'Present at start: ' + str(len(start_fid_l)) + ' (' + ', '.join([str(f) for f in start_fid_l]) + ')',
+                'Deleted:          ' + str(len(success_l)) + ' (' + ', '.join([str(f) for f in success_l]) + ')',
+                'Failed to delete: ' + str(len(fail_l)) + ' (' + ', '.join(str(f) for f in fail_l) + ')',
+                'Present at end:   ' + str(len(end_fid_l)) + ' (' + ', '.join([str(f) for f in end_fid_l]) + ')',
+            ],
+            echo=True
+        )
 
     return ec
 
@@ -196,12 +224,13 @@ def _get_input():
         if len(args_fid_help) > 0:
             args_fid_help = ' *ERROR: ' + args_fid_help
             ec = -1
+    else:
+        args_fid_l = [fid for fid in range(1, 129)]
 
     # Command line feedback
     ml = ['switch_delete.py:    ' + __version__,
           'IP, -ip:             ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
           'ID, -id:             ' + args_d['id'],
-          'Security, -s:        ' + args_d['s'],
           'FID, -fid:           ' + args_d['fid'] + args_fid_help,
           'Log, -log:           ' + str(args_d['log']),
           'No log, -nl:         ' + str(args_d['nl']),
@@ -211,7 +240,7 @@ def _get_input():
     brcdapi_log.log(ml, echo=True)
 
     return ec if ec != 0 else \
-        pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_d['s'], args_fid_l)
+        pseudo_main(args_d['ip'], args_d['id'], args_d['pw'], args_fid_l)
 
 
 ###################################################################

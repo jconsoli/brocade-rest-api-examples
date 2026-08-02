@@ -108,15 +108,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import datetime
 import argparse
@@ -184,7 +186,6 @@ _report_defaults = collections.OrderedDict()
 _report_defaults['ip_addr'] = dict(c=14, v=None, str=False, l=True)
 _report_defaults['user_id'] = dict(c=14, v=None, str=False, l=True)
 _report_defaults['pw'] = dict(c=14, v=None, str=False, l=True)
-_report_defaults['security'] = dict(c=10, v=None, str=False, l=True)
 _report_defaults['certificate-entity'] = dict(c=12, v=None, str=False, l=False)
 _report_defaults['certificate-type'] = dict(c=12, v=None, str=False, l=False)
 _report_defaults['days'] = dict(c=8, v=None, str=False, l=False)
@@ -208,7 +209,7 @@ _login_keys = [k for k, d in _report_defaults.items() if d['l']]
 _alt_names = ['subject-alternative-name-dns-names', 'subject-alternative-name-ip-addresses']
 _param_keys = [k for k in _report_defaults.keys() if k not in _login_keys+_alt_names]
 _report_hdr = {  # Key is the first row header. Dictionary is 's' for first column, 'e' last column for cell merge
-    'Login Credentials': dict(s='ip_addr', e='security'),
+    'Login Credentials': dict(s='ip_addr', e='pw'),
     'Input Parameters': dict(s='certificate-entity', e='days'),
     'Certificate Expiry': dict(s='begins', e='expires'),
     'Certificate Files': dict(s='in_file', e='out_file'),
@@ -806,9 +807,8 @@ def _login(switch_d):
     :param switch_d: Switch dictionary from input_d[ip_addr] as returned from _get_input()
     :type switch_d: dict
     """
-    sec = 'none' if switch_d['security'] is None else switch_d['security']
     brcdapi_log.log('  Attempting login', echo=True)
-    session = brcdapi_rest.login(switch_d['user_id'], switch_d['pw'], switch_d['ip_addr'], sec)
+    session = brcdapi_rest.login(switch_d['user_id'], switch_d['pw'], switch_d['ip_addr'])
     if fos_auth.is_error(session):
         brcdapi_log.log(['  Login failed. Error message is:', '    ' + fos_auth.formatted_error_msg(session)],
                         echo=True)
@@ -839,7 +839,7 @@ def _get_input():
     """Parses the module load command line, performs basic parameter validation checks, and sets up the log file.
 
     Programmer's tip: The intent of this module is to illustrate how to manage security certificates. Doing that
-    requires more input than is reasonable to put in a command string so I read data from a Workbook reusing utility
+    requires more input than is reasonable to put in a command string, so I read data from a Workbook reusing utility
     methods I wrote for other applications. Since the nature of how certificates are generated varies widely for
     different organizations, I didn't spend much time on making this neat and more importantly, I didn't spend much time
     validating the user input.
@@ -867,8 +867,6 @@ def _get_input():
     | user_id   | str   | Login ID                                                                                  |
     +-----------+-------+-------------------------------------------------------------------------------------------+
     | pw        | str   | Password                                                                                  |
-    +-----------+-------+-------------------------------------------------------------------------------------------+
-    | security  | str   | Security, 'none', 'self', or the CA                                                       |
     +-----------+-------+-------------------------------------------------------------------------------------------+
     | _params_l | list  | List of dictionaries for all remaining row items. This is a list because subsequent rows  |
     |           |       | with no login credentials are more certs associated with the same switch.                 |

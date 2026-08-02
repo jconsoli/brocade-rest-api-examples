@@ -31,15 +31,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import brcdapi.util as brcdapi_util
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -101,7 +103,6 @@ _DEBUG_ZONECFG_DEL_MEMS = ['zone_0_for_delete']
 _DEBUG_IP = '10.8.105.10'
 _DEBUG_ID = 'admin'
 _DEBUG_PW = 'password'
-_DEBUG_SEC = 'self'  # 'none'
 _DEBUG_FID = 20
 _DEBUG_VERBOSE = False  # When True, all content and responses are formatted and printed.
 
@@ -137,7 +138,7 @@ def _logout(session):
         brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), True)
 
 
-def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
+def pseudo_main(user_id, pw, ip, vd, log, nl):
     """Basically the main().
 
     :param user_id: User ID
@@ -146,8 +147,6 @@ def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
     :type pw: str
     :param ip: IP address
     :type ip: str
-    :param sec: Security. 'none' for HTTP, 'self' for self-signed certificate, 'CA' for signed certificate
-    :type sec: str
     :param vd: When True, enables debug logging
     :type vd: bool
     :param log: Log file prefix. Typically, a folder name followed by '/'
@@ -167,7 +166,7 @@ def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
 
     # Login
     brcdapi_log.log('Attempting login', True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log('Login failed', True)
         brcdapi_log.log(brcdapi_auth.formatted_error_msg(session), True)
@@ -295,5 +294,4 @@ def pseudo_main(user_id, pw, ip, sec, vd, log, nl):
 #
 ###################################################################
 if not _DOC_STRING:
-    brcdapi_log.close_log(str(pseudo_main(_DEBUG_ID, _DEBUG_PW, _DEBUG_IP, _DEBUG_SEC, _DEBUG_VERBOSE, _DEBUG_LOG,
-                                          _DEBUG_NL)))
+    brcdapi_log.close_log(str(pseudo_main(_DEBUG_ID, _DEBUG_PW, _DEBUG_IP, _DEBUG_VERBOSE, _DEBUG_LOG, _DEBUG_NL)))

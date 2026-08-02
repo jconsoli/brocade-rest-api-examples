@@ -36,15 +36,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import argparse
 from cryptography import x509
@@ -63,7 +65,6 @@ _DEBUG = False
 _DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_d = True
 _DEBUG_log = '_logs'
 _DEBUG_nl = False
@@ -131,14 +132,12 @@ def _get_input():
     :rtype user_id: str
     :return pw: Login password
     :rtype pw: str
-    :return sec: 'self' for self-signed certificate (HTTPS) or 'none' (HTTP)
-    :rtype sec: str
     """
-    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_d, _DEBUG_log, _DEBUG_nl
+    global _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_d, _DEBUG_log, _DEBUG_nl
 
     if _DEBUG:
         args_ip, args_id, args_pw, args_s, args_d, args_log, args_nl = \
-            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_d, _DEBUG_log, _DEBUG_nl
+            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_d, _DEBUG_log, _DEBUG_nl
     else:
         buf = 'Displays the results from GET running/brocade-security/security-certificate. In addition to security '\
               'certificates, this URL also returns CSRs. Usually, this done to validate certificates so the CSRs '\
@@ -147,8 +146,6 @@ def _get_input():
         parser.add_argument('-ip', help='(Required) IP address', required=True)
         parser.add_argument('-id', help='(Required) User ID', required=True)
         parser.add_argument('-pw', help='(Required) Password', required=True)
-        parser.add_argument('-s', help='Optional. "none" for HTTP. The default is "self" for HTTPS mode.',
-                            required=False)
         buf = '(Optional) Enable debug logging. Prints the formatted data structures (pprint) to the log and console.'
         parser.add_argument('-d', help=buf, action='store_true', required=False)
         buf = '(Optional) Directory where log file is to be created. Default is to use the current directory. The log' \
@@ -158,27 +155,24 @@ def _get_input():
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
 
         args = parser.parse_args()
-        args_ip, args_id, args_pw, args_s, args_d, args_log, args_nl = \
-            args.ip, args.id, args.pw, args.s, args.d, args.log, args.nl
+        args_ip, args_id, args_pw, args_d, args_log, args_nl = \
+            args.ip, args.id, args.pw, args.d, args.log, args.nl
 
     # Set up the log file
     brcdapi_log.open_log(folder=args_log, suppress=False, version_d=brcdapi_util.get_import_modules(), no_log=args_nl)
     if args_d:  # Verbose debug
         brcdapi_rest.verbose_debug(True)
 
-    # Condition the input
-    if args_s is None:
-        args_s = 'self'
-
     # User feedback about input.
     ml = ['WARNING: Debug mode is enabled'] if _DEBUG else list()
-    ml.extend(['IP, -ip:                   ' + brcdapi_util.mask_ip_addr(args_ip, True),
-               'ID, -id:                   ' + args_id,
-               'Security, -sec:            ' + args_s,
-               ''])
+    ml.extend([
+        'IP, -ip:                   ' + brcdapi_util.mask_ip_addr(args_ip, True),
+        'ID, -id:                   ' + args_id,
+        ''
+    ])
     brcdapi_log.log(ml, echo=True)
 
-    return args_ip, args_id, args_pw, args_s
+    return args_ip, args_id, args_pw
 
 
 def pseudo_main():
@@ -190,11 +184,11 @@ def pseudo_main():
     ec, cert_obj = 0, None
 
     # Get the command line input
-    ip_addr, user_id, pw, sec = _get_input()
+    ip_addr, user_id, pw = _get_input()
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    session = brcdapi_rest.login(user_id, pw, ip_addr, sec)
+    session = brcdapi_rest.login(user_id, pw, ip_addr)
     if fos_auth.is_error(session):
         brcdapi_log.log('Login failed. Error message is:', echo=True)
         brcdapi_log.log(fos_auth.formatted_error_msg(session), echo=True)

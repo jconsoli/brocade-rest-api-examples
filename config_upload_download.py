@@ -56,15 +56,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.4     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.5     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.4'
+__version__ = '4.0.5'
 
 import argparse
 import pprint
@@ -82,7 +84,6 @@ _DEBUG = False
 _DEBUG_ip = 'xx.xxx.x.69'
 _DEBUG_id = 'admin'
 _DEBUG_pw = 'password'
-_DEBUG_s = None  # HTTPS is the default. Use 'none' for HTTP.
 _DEBUG_fid = '1'
 _DEBUG_sfid = None
 _DEBUG_a = 'down'
@@ -214,15 +215,15 @@ def _get_input():
     :return action: List of actions to take
     :rtype action: list
     """
-    global _scope_d, _action_tbl_d, _DEBUG, _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_f, _DEBUG_fid
+    global _scope_d, _action_tbl_d, _DEBUG, _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_f, _DEBUG_fid
     global _DEBUG_sfid, _DEBUG_a, _DEBUG_scope, _DEBUG_pa, _DEBUG_d, _DEBUG_sup, _DEBUG_log, _DEBUG_nl
 
     ec = 0  # Return error code
     valid_actions = ', '.join([str(k) for k in _action_tbl_d.keys()])
 
     if _DEBUG:
-        args_ip, args_id, args_pw, args_s, args_f, args_fid, args_sfid, args_a, args_scope = \
-            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_s, _DEBUG_f, _DEBUG_fid, _DEBUG_sfid, _DEBUG_a, _DEBUG_scope
+        args_ip, args_id, args_pw, args_f, args_fid, args_sfid, args_a, args_scope = \
+            _DEBUG_ip, _DEBUG_id, _DEBUG_pw, _DEBUG_f, _DEBUG_fid, _DEBUG_sfid, _DEBUG_a, _DEBUG_scope
         args_pa, args_d, args_sup, args_log, args_nl = _DEBUG_pa, _DEBUG_d, _DEBUG_sup, _DEBUG_log, _DEBUG_nl
     else:
         buf = 'Initially developed as programming examples. A shell interface was added to be run as a stand-alone '\
@@ -257,8 +258,8 @@ def _get_input():
         buf = '(Optional) No parameters. When set, a log file is not created. The default is to create a log file.'
         parser.add_argument('-nl', help=buf, action='store_true', required=False)
         args = parser.parse_args()
-        args_ip, args_id, args_pw, args_s, args_f, args_fid, args_sfid, args_a, args_scope, args_pa = \
-            args.ip, args.id, args.pw, args.s, args.f, args.fid, args.sfid, args.a, args.scope, args.pa
+        args_ip, args_id, args_pw, args_f, args_fid, args_sfid, args_a, args_scope, args_pa = \
+            args.ip, args.id, args.pw, args.f, args.fid, args.sfid, args.a, args.scope, args.pa
         args_d, args_sup, args_log, args_nl = args.d, args.sup, args.log, args.nl
 
     # Set up the log and debug parameters
@@ -272,10 +273,6 @@ def _get_input():
         version_d=brcdapi_util.get_import_modules(),
         no_log=args_nl
     )
-
-    # Default security
-    if args_s is None:
-        args_s = 'self'
 
     # Validate actions, -a
     action_buf = args_a
@@ -309,7 +306,6 @@ def _get_input():
     ml = ['config_upload_download.py: ' + __version__,
           'IP address, -ip:           ' + brcdapi_util.mask_ip_addr(args_ip),
           'ID, -id:                   ' + args_id,
-          'Secure, -s:                ' + str(args_s),
           'File, -f:                  ' + args_f,
           'Fabric ID, -fid:           ' + fid_buf,
           'Source Fabric ID, -sfid:   ' + sfid_buf,
@@ -323,7 +319,6 @@ def _get_input():
     param_d = dict(ip=args_ip,
                    id=args_id,
                    pw=args_pw,
-                   sec=args_s,
                    file=brcdapi_file.full_file_name(args_f, '.txt'),
                    fid=fid,
                    sfid=sfid,
@@ -347,7 +342,7 @@ def pseudo_main():
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    param_d['session'] = brcdapi_rest.login(param_d['id'], param_d['pw'], param_d['ip'], param_d['sec'])
+    param_d['session'] = brcdapi_rest.login(param_d['id'], param_d['pw'], param_d['ip'])
     if fos_auth.is_error(param_d['session']):
         brcdapi_log.log(['Login failed:', fos_auth.formatted_error_msg(param_d['session'])], echo=True)
         return -1

@@ -81,15 +81,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.5     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.6     | 01 Aug 2026   | Remove CLI wait. This is now done automatically in brcdapi.brcdapi_rest               |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.5'
+__version__ = '4.0.6'
 
 import os
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -179,8 +181,8 @@ def _action_p_enable(session, fid, in_port_l, cli):
 
 def _action_decom(session, fid, in_port_l, cli):
     """Decommission a port or list of ports. See _action_name() for parameters and return value definitions"""
-    # Since users may be using the port list for names, 's/p:name', below strips out the name
-    return brcdapi_port.decommission_port(session, fid, [p.split(':')[0] for p in in_port_l], 'port')
+    # Since users may be using the port list for names, s/p:name, below strips out the name
+    return brcdapi_port.decommission_port(session, fid, [p.split(':')[0] for p in in_port_l])
 
 
 def _action_clear(session, fid, in_port_l, cli):
@@ -195,10 +197,9 @@ def _action_cli(session, fid, in_port_l, cli):
     # Since users may be using the port list for names, 's/p:name', below strips out the name
     for port in [p.split(':')[0] for p in in_port_l]:
         cmd = cli.replace('$p', port)
-        response = fos_cli.send_command(session, fid, cmd)
-        # Not doing anything with the response. At least not yet anyway. Just put it in the log without echo.
-        brcdapi_log.log(['Command:  ' + cmd, 'Response: ' + str(response)])
-    fos_cli.cli_wait()  # Let the API and CLI sync up.
+        response_l = fos_cli.send_command(session, fid, cmd)
+        # Not doing anything with the response_l. At least not yet anyway. Just put it in the log without echo.
+        brcdapi_log.log(['Command:  ' + cmd, 'Response(s):'] + ['  ' + str(b) for b in response_l])
     return brcdapi_util.GOOD_STATUS_OBJ
 
 
@@ -329,8 +330,6 @@ def _get_input():
     :rtype id: str
     :return pw: User password
     :rtype ip: str
-    :return sec: Secure method. None for HTTP, otherwise the certificate or 'self' if self-signed
-    :rtype sec: str, None
     :return fid: FID associated with the ports, port_l
     :rtype fid: str
     :return port_l: Ports to operate on
@@ -359,7 +358,6 @@ def _get_input():
         os.path.basename(__file__) + ', ' + __version__,
         'IP, -ip:         ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
         'ID, -id:         ' + args_d['id'],
-        'Security, -s:    ' + args_d['s'],
         'FID List, -fid:  ' + str(args_d['fid']),
         'Ports, -p:       ' + args_d['p'],
         'Actions, -a:     ' + args_d['a'],
@@ -390,8 +388,7 @@ def _get_input():
 
     brcdapi_log.log(ml, echo=True)
 
-    return ec, args_d['ip'], args_d['id'], args_d['pw'], args_d['s'], args_d['fid'], args_d['p'], action_l, \
-        args_d['cli']
+    return ec, args_d['ip'], args_d['id'], args_d['pw'], args_d['fid'], args_d['p'], action_l, args_d['cli']
 
 
 def pseudo_main():
@@ -401,13 +398,13 @@ def pseudo_main():
     :rtype: int
     """
     # Get and validate command line input
-    ec, ip, user_id, pw, sec, fid, args_p, action_l, cli = _get_input()
+    ec, ip, user_id, pw, fid, args_p, action_l, cli = _get_input()
     if ec != 0:
         return ec
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log(['Login failed:', brcdapi_auth.formatted_error_msg(session)], echo=True)
         return -1

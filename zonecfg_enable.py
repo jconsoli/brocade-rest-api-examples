@@ -35,15 +35,17 @@ details.
 +-----------+---------------+---------------------------------------------------------------------------------------+
 | 4.0.5     | 20 Feb 2026   | Updated copyright notice.                                                             |
 +-----------+---------------+---------------------------------------------------------------------------------------+
+| 4.0.6     | 01 Aug 2026   | Removed obsolete HTTP access. Only HTTPS is supported.                                |
++-----------+---------------+---------------------------------------------------------------------------------------+
 """
 __author__ = 'Jack Consoli'
 __copyright__ = 'Copyright 2024, 2025, 2026 Jack Consoli'
-__date__ = '20 Feb 2026'
+__date__ = '01 Aug 2026'
 __license__ = 'Apache License, Version 2.0'
 __email__ = 'jack_consoli@yahoo.com'
 __maintainer__ = 'Jack Consoli'
 __status__ = 'Released'
-__version__ = '4.0.5'
+__version__ = '4.0.6'
 
 import argparse
 import brcdapi.brcdapi_rest as brcdapi_rest
@@ -84,7 +86,7 @@ def _logout(session):
         brcdapi_log.log('Logout failed:\n' + brcdapi_auth.formatted_error_msg(obj), echo=True)
 
 
-def pseudo_main(user_id, pw, ip, sec, fid, zone_cfg):
+def pseudo_main(user_id, pw, ip, fid, zone_cfg):
     """Basically the main().
 
     :param user_id: User ID
@@ -93,8 +95,6 @@ def pseudo_main(user_id, pw, ip, sec, fid, zone_cfg):
     :type pw: str
     :param ip: IP address
     :type ip: str
-    :param sec: Security. 'none' for HTTP, 'self' for self-signed certificate, 'CA' for signed certificate
-    :type sec: str
     :param fid: Fabric ID
     :type fid: int, str
     :param zone_cfg: Name of zone configuration to activate
@@ -106,7 +106,7 @@ def pseudo_main(user_id, pw, ip, sec, fid, zone_cfg):
 
     # Login
     brcdapi_log.log('Attempting login', echo=True)
-    session = brcdapi_rest.login(user_id, pw, ip, sec)
+    session = brcdapi_rest.login(user_id, pw, ip)
     if brcdapi_auth.is_error(session):
         brcdapi_log.log(['Login failed', brcdapi_auth.formatted_error_msg(session)], echo=True)
         return -1
@@ -150,7 +150,7 @@ def _get_input():
     """
     global __version__, _input_d
 
-    ec, args_s_append = 0, ''
+    ec = 0
 
     # Get command line input
     try:
@@ -173,7 +173,6 @@ def _get_input():
         'zonecfg_enable.py version: ' + __version__,
         'IP, -ip:                   ' + brcdapi_util.mask_ip_addr(args_d['ip'], keep_last=True),
         'ID, -id:                   ' + args_d['id'],
-        'Security, -s:              ' + args_d['s'],
         'Zone configuration, -z:    ' + str(args_d['z']),
         'Log, -log:                 ' + str(args_d['log']),
         'No log, -nl:               ' + str(args_d['nl']),
@@ -183,7 +182,7 @@ def _get_input():
         ]
     brcdapi_log.log(ml, echo=True)
 
-    return ec if ec != 0 else pseudo_main(args_id, args_pw, args_ip, args_s, args_fid, args_z)
+    return ec if ec != 0 else pseudo_main(args_id, args_pw, args_ip, args_fid, args_z)
 
 
 ###################################################################
