@@ -7,6 +7,12 @@ jack_consoli@yahoo.com
 
 Sample scripts to create, delete, and modify switch, port, and zone using the Brocade FOS REST API drivers in brcdapi
 
+**Update 02 Aug 2026**
+
+* Added z17
+* Updates for FOS 10, Gen 8
+* Added CLI for switches and chassis
+
 **Update 20 Feb 2026**
 * Updated copyright notice
 
